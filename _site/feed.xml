@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-08T11:12:40+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">Test for blogging</title><link href="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该 blog 用于说明写 blog 的一些格式要求。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-08T22:18:29+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">Test for blogging</title><link href="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该 blog 用于说明写 blog 的一些格式要求。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
@@ -77,29 +77,149 @@ jekyll serve
 &lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; alt=&quot;test_image&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;第二种方法效果：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">该 blog 用于说明写 blog 的一些格式要求。</summary></entry><entry><title type="html">东北旅行</title><link href="http://localhost:4000/life/travel/2019/02/07/md.html" rel="alternate" type="text/html" title="东北旅行" /><published>2019-02-07T10:26:57+08:00</published><updated>2019-02-07T10:26:57+08:00</updated><id>http://localhost:4000/life/travel/2019/02/07/md</id><content type="html" xml:base="http://localhost:4000/life/travel/2019/02/07/md.html">&lt;p&gt;&lt;img src=&quot;/image/DongBei/snow_train.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
-
-&lt;h3 id=&quot;扬帆&quot;&gt;扬帆&lt;/h3&gt;
-
-&lt;p&gt;年初因为课题的选择问题，弄得焦头烂额。&lt;/p&gt;
-
-&lt;!--more--&gt;</content><author><name>cdz</name></author><summary type="html">扬帆 年初因为课题的选择问题，弄得焦头烂额。</summary></entry><entry><title type="html">Test1</title><link href="http://localhost:4000/life/2019/02/06/test1.html" rel="alternate" type="text/html" title="Test1" /><published>2019-02-06T18:45:51+08:00</published><updated>2019-02-06T18:45:51+08:00</updated><id>http://localhost:4000/life/2019/02/06/test1</id><content type="html" xml:base="http://localhost:4000/life/2019/02/06/test1.html">&lt;p&gt;This is test for categories&lt;/p&gt;</content><author><name>cdz</name></author><category term="Life" /><summary type="html">This is test for categories</summary></entry><entry><title type="html">Welcome Aboard</title><link href="http://localhost:4000/tech/life/2019/02/02/welcome-aboard.html" rel="alternate" type="text/html" title="Welcome Aboard" /><published>2019-02-02T08:40:40+08:00</published><updated>2019-02-02T08:40:40+08:00</updated><id>http://localhost:4000/tech/life/2019/02/02/welcome-aboard</id><content type="html" xml:base="http://localhost:4000/tech/life/2019/02/02/welcome-aboard.html">&lt;p&gt;This is test for the blog.&lt;/p&gt;
-
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c--&quot; data-lang=&quot;c++&quot;&gt; 
-&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-	&lt;span class=&quot;n&quot;&gt;printf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Hello World!&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;</content><author><name>cdz</name></author><category term="[&quot;Tech&quot;, &quot;Life&quot;]" /><summary type="html">This is test for the blog.</summary></entry><entry><title type="html">Welcome to Jekyll!</title><link href="http://localhost:4000/tech/test/2019/02/02/welcome-to-jekyll.html" rel="alternate" type="text/html" title="Welcome to Jekyll!" /><published>2019-02-02T08:22:20+08:00</published><updated>2019-02-02T08:22:20+08:00</updated><id>http://localhost:4000/tech/test/2019/02/02/welcome-to-jekyll</id><content type="html" xml:base="http://localhost:4000/tech/test/2019/02/02/welcome-to-jekyll.html">&lt;p&gt;You’ll find this post in your &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run &lt;code class=&quot;highlighter-rouge&quot;&gt;jekyll serve&lt;/code&gt;, which launches a web server and auto-regenerates your site when a file is updated.&lt;/p&gt;
-
-&lt;p&gt;To add new posts, simply add a file in the &lt;code class=&quot;highlighter-rouge&quot;&gt;_posts&lt;/code&gt; directory that follows the convention &lt;code class=&quot;highlighter-rouge&quot;&gt;YYYY-MM-DD-name-of-post.ext&lt;/code&gt; and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">该 blog 用于说明写 blog 的一些格式要求。</summary></entry><entry><title type="html">在东北</title><link href="http://localhost:4000/life/travel/2019/02/07/md.html" rel="alternate" type="text/html" title="在东北" /><published>2019-02-07T10:26:57+08:00</published><updated>2019-02-07T10:26:57+08:00</updated><id>http://localhost:4000/life/travel/2019/02/07/md</id><content type="html" xml:base="http://localhost:4000/life/travel/2019/02/07/md.html">&lt;p&gt;&lt;img src=&quot;/image/DongBei/snow_train.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
 
 &lt;!--more--&gt;
 
-&lt;p&gt;Jekyll also offers powerful support for code snippets:&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;扬帆&quot;&gt;扬帆&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 
-&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-ruby&quot; data-lang=&quot;ruby&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-  &lt;span class=&quot;nb&quot;&gt;puts&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;Hi, &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;#{&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;si&quot;&gt;}&lt;/span&gt;&lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;
-&lt;span class=&quot;k&quot;&gt;end&lt;/span&gt;
-&lt;span class=&quot;n&quot;&gt;print_hi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;'Tom'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
-&lt;span class=&quot;c1&quot;&gt;#=&amp;gt; prints 'Hi, Tom' to STDOUT.&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+&lt;p&gt;今年上海的雪下得吊人胃口，虽说来的早，可落地即化，未免有点失望。&lt;br /&gt;
+对于南方人，能在冬天看看雪，吃点冰块就很幸福了。&lt;br /&gt;&lt;/p&gt;
 
-&lt;p&gt;Check out the &lt;a href=&quot;https://jekyllrb.com/docs/home&quot;&gt;Jekyll docs&lt;/a&gt; for more info on how to get the most out of Jekyll. File all bugs/feature requests at &lt;a href=&quot;https://github.com/jekyll/jekyll&quot;&gt;Jekyll’s GitHub repo&lt;/a&gt;. If you have questions, you can ask them on &lt;a href=&quot;https://talk.jekyllrb.com/&quot;&gt;Jekyll Talk&lt;/a&gt;.&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when a file is updated. To add new posts, simply add a file in the _posts directory that follows the convention YYYY-MM-DD-name-of-post.ext and includes the necessary front matter. Take a look at the source for this post to get an idea about how it works.</summary></entry></feed>
+&lt;p&gt;要不要一起去东北玩？ &lt;br /&gt;
+妥！！！&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;出发前对于东北充满好奇。&lt;br /&gt;
+零下20度是什么概念？&lt;br /&gt;
+一出山海关，都是赵本山？&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;接着就是各种准备。加厚棉袜，手套，雪地靴，雷锋帽，暖宝宝。&lt;br /&gt;
+出于对零下20度的敬畏，线上线下一顿忙活。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;奉天&quot;&gt;奉天&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;
+到沈阳，住进宾馆，已是傍晚。&lt;br /&gt;
+随后就在中街溜达，刚开始去了个假的中街。&lt;br /&gt;
+一行人就感叹，怎么着也是个省会城市的最有名的步行街，怎么能这么小？&lt;br /&gt;
+失望的找地铁站回家途中，走到了真正的中街，豁然开朗。&lt;br /&gt;
+它拥有了一个步行街该有的繁华，绚丽。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;不得不说，东北的暖气是神一般的存在。&lt;br /&gt;
+当晚在宾馆，热得一宿没睡，就在思考一个问题，为啥暖气不设计为可以选择性开关？&lt;br /&gt;
+想来想去也没想到好的解决办法。&lt;br /&gt;
+如果给用户可以关闭暖气的开关的话，那么暖气就应该走另外的辅助通道，而对于暖气供应公司来说，并没有减少能耗，还不如不让关闭，还能都收取费用。&lt;br /&gt;
+那么能不能重新设计暖气通道，使得暖气不需要辅助通道的情况下设计为可以选择性关闭？而这又是一个图连通问题，我们不确定哪些用户会关闭暖气，有可能一些用户关闭暖气后，导致图不连通，使得某些开暖气的用户，也无法开启暖气。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;第二天就去了沈阳冰雪大世界，各种游乐项目：冰上碰碰车，雪摩托，雪地飞狐。&lt;br /&gt;
+最刺激的还是冰滑道：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/shenyang_ski.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;泡澡&quot;&gt;泡澡&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;刚开始提出去泡澡计划，我想都没想就拒绝了。&lt;br /&gt;
+之后被各种安利，想想东北特色的洗澡文化，来都来了，不体验一把还是有点遗憾的。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;这边泡澡基本流程就是：冲、泡、搓、蒸、冲。&lt;br /&gt;
+搓澡的时候会有各种选择，有红酒搓，醋搓；红酒搓听起来就x格高，自然就选了这个。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;在一个类似火车卧铺的床位上加上一层一次性桌布，往上一躺。&lt;br /&gt;
+搓澡师当面开封一个新的搓澡巾, 然后就卡卡搓上了。&lt;br /&gt;
+变搓边唠嗑，东北话自带幽默属性。&lt;br /&gt;
+闭眼，细听，完全认同了东北的搓澡文化。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;想体验东北文化，就得整全套的。&lt;br /&gt;
+搓澡之后的烧烤是必须的，东北澡堂周边必有烧烤店。&lt;br /&gt;
+几盘烧烤，一瓶啤酒，甚是满足。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/barbecue.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;哈尔滨&quot;&gt;哈尔滨&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;哈尔滨就更冷了，拿手机拍照都需要很大的勇气。&lt;br /&gt;
+一是，拍照需要摘下手套，又冷又麻烦。&lt;br /&gt;
+再者，手机用电很快，且容易冻关机。&lt;br /&gt;
+在风大的地方，很多人是倒退走路的：&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/walk_backward.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+在这可以看到浓郁俄罗斯风情的中央大街，随处可听到 “喀秋莎”。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/central_street.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+在中央大街附近还有索菲亚大教堂，是一个拜占庭风格的教堂，据说是沙俄第四步兵师修建中东铁路时修建的一座随军教堂。&lt;br /&gt;
+夜晚的教堂气宇轩昂。&lt;br /&gt;
+同行的一小伙，硬是拿着 GoPro 绕着教堂跑了一圈。&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/church.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;滑雪&quot;&gt;滑雪&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;早上5点多起来坐车去，亚布力滑雪场。&lt;br /&gt;
+在中途休息站能看到很有东北特色的小贩。&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/shop.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;滑雪之前还是被忽悠加了一些别的项目，马拉犁、冰滑道、等一些热门娱乐。&lt;br /&gt;
+马拉着一车人，在雪地里“飞驰”。&lt;br /&gt;
+同车的一大叔开玩笑道：“这马不给力啊，别弄的我们都得下去推车了”。&amp;gt;_&amp;lt;||| &lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/malali2.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;也终于到了滑雪的时候。&lt;br /&gt;
+曾听说滑雪是白色鸦片，第一次接触滑雪的人，要么从此别过，要么就沾上这个“鸦片”。&lt;br /&gt;
+我们滑雪前都定了一个小目标：能够独立缓慢滑行。&lt;br /&gt;
+由于我们都有穷病就没有请教练 &amp;gt;_&amp;lt;|||&lt;br /&gt;
+刚开始的时候，五米一小摔倒，十米一大摔。&lt;br /&gt;
+幸得滑雪场旁边一大爷给我指点，后面摔倒明显减少，就算摔也比之前摔的有尊严一点。&lt;br /&gt;
+我感觉滑雪和开车也有相似之处，滑的时候不要盯着脚下，要看前方。&lt;br /&gt;
+这和人生的方向把握是否也有相似之处呢？&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/ski2.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;松花江&quot;&gt;松花江&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;松花江上结了一层厚冰，上面堆满了雪人，这得有多少人对雪爱的深沉&lt;br /&gt;
+我们决定冰面上横跨松花江。&lt;br /&gt;
+一行人，围巾遮面，低头避风就缓慢出发了。&lt;br /&gt;
+走到松花江中间，环顾四周，突感大自然的神奇，一条活动的江水居然能够结冰，且如此结实。&lt;br /&gt;
+由于不敢和寒风正面刚，本来应该垂直跨过松花江，硬生生走出了一条大斜线。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/DongBei/snow_man.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;吃&quot;&gt;吃&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;在东北吃的最感人的就属冰糖葫芦了，五块钱一串，冰冰的、酸酸的、甜甜的，甚是可口。&lt;br /&gt;
+这让我想起霸王别姬中的桥段，一小孩在自杀之前最后的愿望就是吃冰糖葫芦。&lt;br /&gt;
+回上海之前，还特意早起去马迭尔买了几串冰糖葫芦带回来。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;其它的特色食物就是：红菜汤，锅包肉，老太太烧烤，烤冷面，秋林红肠；除了老太太烧烤有点失望外，其余都还算满意。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;后记&quot;&gt;后记&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;后面，还特意去了趟哈尔滨工业大学，感受一波北方大学的建筑风格。&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;“世界不是苟且，世界是远方，行万里路才能回到内心深处；未来不是岁数，未来是谜雾，读万卷书才能看清皓月繁星。” &lt;br /&gt;
+好好学习，好好工作，赚够旅游的盘缠。&lt;br /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html"></summary></entry></feed>
