@@ -1,0 +1,19 @@
+---
+layout: post
+title: "东北旅行"
+date: 2019-02-07T10:26:57+08:00
+categories: [Life, Travel]
+author: cdz
+excerpt_separator: <!--more-->
+---
+
+<p><img src="/image/DongBei/snow_train.jpg" width="500"></p>
+
+### 扬帆
+
+年初因为课题的选择问题，弄得焦头烂额。
+
+
+
+<!--more-->
+

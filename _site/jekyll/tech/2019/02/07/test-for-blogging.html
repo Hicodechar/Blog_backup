@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Test for blogging | CDZ</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Test for blogging" />
+<meta name="author" content="cdz" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="该 blog 用于说明写 blog 的一些格式要求。" />
+<meta property="og:description" content="该 blog 用于说明写 blog 的一些格式要求。" />
+<link rel="canonical" href="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html" />
+<meta property="og:url" content="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html" />
+<meta property="og:site_name" content="CDZ" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-02-07T12:55:13+08:00" />
+<script type="application/ld+json">
+{"description":"该 blog 用于说明写 blog 的一些格式要求。","author":{"@type":"Person","name":"cdz"},"@type":"BlogPosting","url":"http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html","headline":"Test for blogging","dateModified":"2019-02-07T12:55:13+08:00","datePublished":"2019-02-07T12:55:13+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="CDZ" /></head>
+<body><header class="site-header" role="banner">
+  <div class="wrapper">
+    <!-- [cdz]: 添加以下一行用于给 pages 排序，排序规则按照 page 中的 order 属性排序 -->
+    <!-- [cdz]: 参考网址：https://stackoverflow.com/questions/13266369/how-to-change-the-default-order-pages-in-jekyll --><a class="site-title" rel="author" href="/">CDZ</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/">Home</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/contact.html">Contact</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/categories/Tech"></a><a class="page-link" href="/categories/Jekyll"></a><a class="page-link" href="/categories/Life"></a><a class="page-link" href="/categories/Travel.html"></a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="post-categories" align="right">
+  
+  
+  <a href="/categories/Jekyll">Jekyll</a>
+  &nbsp;
+  
+  <a href="/categories/Tech">Tech</a>
+  
+  
+</div>
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting"> 
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Test for blogging</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2019-02-07T12:55:13+08:00" itemprop="datePublished">Feb 7, 2019
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">cdz</span></span></p>
+  </header>
+
+
+
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>该 blog 用于说明写 blog 的一些格式要求。
+<!--more--></p>
+
+<p><br /></p>
+<h3 id="新建-blog">新建 blog</h3>
+
+<p>当需要创建一个新的 blog 时(假设名字为：Test for blogging), 在 blog 的主目录中输入以下命令：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>octopress new post Test for blogging
+</code></pre></div></div>
+
+<p>该命令会在文件夹 <code class="highlighter-rouge">_post</code> 中生成文件 <code class="highlighter-rouge">2019-02-07-test-for-blogging.markdown</code>, 文件名前面的时间是自动添加的，编辑该文件为以下格式：</p>
+
+<div class="language-ruby highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">---</span>
+<span class="ss">layout: </span><span class="n">post</span>
+<span class="ss">title: </span><span class="s2">"Test for blogging"</span>
+<span class="ss">date: </span><span class="mi">2019</span><span class="o">-</span><span class="mo">02</span><span class="o">-</span><span class="mo">07</span><span class="no">T12</span><span class="p">:</span><span class="mi">55</span><span class="p">:</span><span class="mi">13</span><span class="o">+</span><span class="mi">08</span><span class="p">:</span><span class="mo">00</span>
+<span class="ss">categories: </span><span class="p">[</span><span class="no">Jekyll</span><span class="p">,</span> <span class="no">Tech</span><span class="p">]</span>
+<span class="ss">author: </span><span class="n">cdz</span>
+<span class="ss">excerpt_separator: </span><span class="o">&lt;!--</span><span class="n">more</span><span class="o">--&gt;</span>
+<span class="o">---</span>
+<span class="err">这里编写</span> <span class="n">blog</span> <span class="err">正文。中间可以用</span> <span class="o">&lt;!--</span><span class="n">more</span><span class="o">--&gt;</span> <span class="err">分割。</span>
+</code></pre></div></div>
+
+<p>以上：</p>
+<ul>
+  <li><code class="highlighter-rouge">layout</code>: 表示该 blog 属于哪个 layout，不同的 layout 会有不同的显示，具体显示的格式规定在文件夹 <code class="highlighter-rouge">_layouts</code> 中，当为 <code class="highlighter-rouge">post</code> 时表示按照 <code class="highlighter-rouge">_layouts/post.html</code> 的格式显示。</li>
+  <li><code class="highlighter-rouge">date</code>: 表示该 blog 的生成时间，是自动生成的。</li>
+  <li><code class="highlighter-rouge">categories</code>: 表示该 blog 属于那一类，可以自己定义，当属于多个类的时候需要使用 <code class="highlighter-rouge">[category1, category2 ]</code></li>
+  <li><code class="highlighter-rouge">author</code>: 表示该 blog 的博主。</li>
+  <li><code class="highlighter-rouge">excerpt_separator: &lt;!--more--&gt;</code>: 表示在该 blog 中使用 <code class="highlighter-rouge">&lt;!--more--&gt;</code> 分割， <code class="highlighter-rouge">&lt;!--more--&gt;</code> 的前一半内容会显示在home中的预览中，后一半只有点进博客才能看到。</li>
+</ul>
+
+<p>这里是插入网址的方法：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>// 格式为：[文中显示内容][网页地址记号]
+// 在文本的最后：[网页地址记号]：网页地址
+[CDZ's Blog][cdz-blog]
+
+[cdz-blog]: https://blog.dianzhangchen.com
+</code></pre></div></div>
+
+<p><br /></p>
+<h3 id="预览-blog">预览 blog</h3>
+
+<p>在主目录中输入：</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>jekyll build
+jekyll serve
+</code></pre></div></div>
+
+<p>这时候在浏览器中输入：<a href="http://localhost:4000/">http://localhost:4000/</a> 就可以去看效果。</p>
+
+<p><br /></p>
+<h3 id="部署-blog-到网站">部署 blog 到网站</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>octopress deploy
+</code></pre></div></div>
+
+<p><br /></p>
+<h3 id="编写-markdown-的一些技巧">编写 markdown 的一些技巧</h3>
+
+<h4 id="1插入空行">(1)、插入空行</h4>
+
+<p>插入空行使用 html 的语法，只需要在相应的位置插入 <code class="highlighter-rouge">&lt;br/&gt;</code></p>
+
+<h4 id="2插入图片">(2)、插入图片</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>![image-title-here](/path/to/image.jpg){:class="img-responsive"}
+
+// 或者按照以下方法，使用 html 语法, 可以调节图片的大小
+&lt;p&gt;&lt;img src="/image/DongBei/barbecue.jpg" width="500"&gt;&lt;/p&gt;
+
+</code></pre></div></div>
+
+<p>第一种方法效果：</p>
+
+<p><img src="/image/test/icon.ico" alt="test_image" class="img-responsive" /></p>
+
+<p>第二种方法效果：</p>
+<p><img src="/image/test/icon.ico" width="500" /></p>
+
+
+  </div><a class="u-url" href="/jekyll/tech/2019/02/07/test-for-blogging.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <!-- <h2 class="footer-heading">CDZ</h2> -->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">CDZ</li><li><a class="u-email" href="mailto:chendianzhang@sjtu.edu.cn">chendianzhang@sjtu.edu.cn</a></li></ul>
+      </div>
+      <!--以下会在 blog 最后显示一些_config.yml 中定义的一些网站的链接, 比如 GitHub 的链接-->
+      <!-- <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/Hicodechar"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">Hicodechar</span></a></li></ul>
+</div> -->
+      <div class="footer-col footer-col-3">
+        <p>Welcome to cdz&#39;s blog. Any questions or suggesions, please contact me.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
