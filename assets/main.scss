@@ -2,4 +2,19 @@
 # Only the main Sass file needs front matter (the dashes are enough)
 ---
 
+// 主页中各个文章的分割线
+.site-post_line {
+    background: none;
+    background-image: none;
+    background-position-x: initial;
+    background-position-y: initial;
+    background-size: initial;
+    background-repeat-x: initial;
+    background-repeat-y: initial;
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: initial;
+  }
+
 @import "minima";
