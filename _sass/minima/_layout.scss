@@ -253,3 +253,23 @@
     }
   }
 }
+
+// [cdz]: for archive
+.archive{
+  .post-list{
+      h1{
+          margin-bottom: 0;
+      }
+      ul{
+          list-style-type: none;
+      }
+      li{
+          margin-bottom: 0;
+      }
+  }
+}
+
+// [cdz]: Read more link
+.read-more-link{
+  float: right;
+}

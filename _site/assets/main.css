@@ -376,6 +376,16 @@ table {
       .post-content h4 {
         font-size: 18px; } }
 
+.archive .post-list h1 {
+  margin-bottom: 0; }
+.archive .post-list ul {
+  list-style-type: none; }
+.archive .post-list li {
+  margin-bottom: 0; }
+
+.read-more-link {
+  float: right; }
+
 /**
  * Syntax highlighting styles
  */

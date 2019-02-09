@@ -23,7 +23,9 @@ layout: default
         </h3>
         {%- if site.show_excerpts -%}
           {{ post.excerpt }}
+          <a href="{{ post.url | prepend: site.baseurl }}" class="read-more-link">[Read more]</a>
         {%- endif -%}
+
       </li>
       <!-- [cdz]: 设置分割线 -->
       <br>
