@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>SSA Form and PHI Nodes | CDZ</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="SSA Form and PHI Nodes" />
+<meta name="author" content="cdz" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码： %19 = phi i1 [ false, %entry ], [ true, %land.rhs ]" />
+<meta property="og:description" content="最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码： %19 = phi i1 [ false, %entry ], [ true, %land.rhs ]" />
+<link rel="canonical" href="http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" />
+<meta property="og:url" content="http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" />
+<meta property="og:site_name" content="CDZ" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-02-14T20:26:29+08:00" />
+<script type="application/ld+json">
+{"description":"最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码： %19 = phi i1 [ false, %entry ], [ true, %land.rhs ]","author":{"@type":"Person","name":"cdz"},"@type":"BlogPosting","url":"http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html","headline":"SSA Form and PHI Nodes","dateModified":"2019-02-14T20:26:29+08:00","datePublished":"2019-02-14T20:26:29+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="CDZ" /><!-- [cdz]: 为了 markdown 数学公式 -->
+  <!-- 参考：
+  https://weilai5432.github.io/2017/01/11/MathJax-%E5%9C%A8MarkDown%E4%B8%AD%E6%8F%92%E5%85%A5%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/ -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX", "output/HTML-CSS"],
+      tex2jax: {
+        <!--$表示行内元素，$$表示块状元素 -->
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+      },
+      "HTML-CSS": { availableFonts: ["TeX"] }
+    });
+  </script>
+  <!--加载MathJax的最新文件， async表示异步加载进来 -->
+  <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js">
+  </script>
+
+</head>
+<body><header class="site-header" role="banner">
+  <div class="wrapper">
+    <!-- [cdz]: 添加以下一行用于给 pages 排序，排序规则按照 page 中的 order 属性排序 -->
+    <!-- [cdz]: 参考网址：https://stackoverflow.com/questions/13266369/how-to-change-the-default-order-pages-in-jekyll --><a class="site-title" rel="author" href="/">CDZ</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/">Home</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/contact.html">Contact</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/categories/Tech"></a><a class="page-link" href="/categories/Life"></a><a class="page-link" href="/categories/Travel.html"></a><a class="page-link" href="/categories/Jekyll"></a><a class="page-link" href="/categories/LLVM"></a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="post-categories" align="right">
+  
+  
+  <a href="/categories/LLVM">LLVM</a>
+  &nbsp;
+  
+  <a href="/categories/Tech">Tech</a>
+  
+  
+</div>
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting"> 
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">SSA Form and PHI Nodes</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2019-02-14T20:26:29+08:00" itemprop="datePublished">Feb 14, 2019
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">cdz</span></span></p>
+  </header>
+
+
+
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码：</p>
+<div class="language-llvm highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nv">%19</span> <span class="p">=</span> <span class="k">phi</span> <span class="kt">i1</span> <span class="p">[</span> <span class="k">false</span><span class="p">,</span> <span class="nv">%entry</span> <span class="p">],</span> <span class="p">[</span> <span class="k">true</span><span class="p">,</span> <span class="nv">%land.rhs</span> <span class="p">]</span>
+</code></pre></div></div>
+<!--more-->
+
+<p>该指令为 <code class="highlighter-rouge">PHINode</code>，为 llvm 中的一个指令类，继承于 <code class="highlighter-rouge">llvm::Instruction</code>，具体继承关系和 llvm 源码见：<a href="https://llvm.org/doxygen/classllvm_1_1PHINode.html">PHINode 类</a> <br />
+本文主要简单介绍一下 <code class="highlighter-rouge">PHINode</code>。</p>
+
+<p><br /></p>
+<h3 id="一ssa-简介">（一）、SSA 简介</h3>
+<hr />
+<p><br />
+在正式介绍 PHI Nodes 之前首先需要了解 <code class="highlighter-rouge">SSA</code> ，因为所有的 LLVM IR 指令都是使用 <code class="highlighter-rouge">SSA</code> 形式表示。</p>
+
+<p><br /></p>
+<h4 id="ssa">SSA</h4>
+<p><br />
+<code class="highlighter-rouge">SSA (static single assignment form)</code> ：<strong>静态一次性赋值</strong>；意思是说<strong>每个变量（虚拟寄存器）都只能被赋值一次</strong>；这样做的好处是可以方便优化代码。</p>
+
+<p>举个例子：</p>
+<div class="language-llvm highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nl">y :</span><span class="p">=</span> <span class="m">1</span>
+ <span class="nl">y :</span><span class="p">=</span> <span class="m">2</span>
+ <span class="nl">x :</span><span class="p">=</span> <span class="err">y</span>
+</code></pre></div></div>
+<p>显然，在以上代码中我们能够一眼看出第一行代码是多余的，因为在第三行使用的 $y$ 的值是来自第二行对 $y$ 的赋值，而不是来自第一行对 $y$ 的赋值。而对于程序来说并不能直观的得出第一行是多余的，需要做数据流分析才能判断第一行是多余的。$SSA$ 恰好能够解决该问题，以上代码用 $SSA$ 形式来表示的话：</p>
+<div class="language-llvm highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nl">y1 :</span><span class="p">=</span> <span class="m">1</span>
+ <span class="nl">y2 :</span><span class="p">=</span> <span class="m">2</span>
+ <span class="nl">x1 :</span><span class="p">=</span> <span class="err">y</span><span class="m">2</span>
+</code></pre></div></div>
+<p>很明显，用以上表示方法程序不需要做数据流分析就能够知道第三行使用的 $y$ 是来自第二行的定义。当然，使用 $SSA$ 还能做很多别的优化，我也没有细看，这里就不再赘述了，有兴趣的话可以参考：<a href="https://en.wikipedia.org/wiki/Static_single_assignment_form">维基百科上的介绍</a></p>
+
+<p><br /></p>
+<h4 id="生成-ssa-形式的指令">生成 SSA 形式的指令</h4>
+<p><br />
+我们可以通过探究 $SSA$ 指令的生成知道为什么要引入 <code class="highlighter-rouge">PHI Nodes</code>。</p>
+
+<p>把一个普通程序转化为 $SSA$ 形式，最简单的做法就是把每一次的赋值都赋值给一个新的变量（或者说是同一个变量的不同版本），同时在使用变量的时候，使用能够到达该程序点对应的”版本”。
+举个例子，在下图的控制流图中，左边图一是原程序流图，右图为按照上述方法生成的 SSA 形式的程序流图。</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">图一：原程序流图</th>
+      <th style="text-align: center">图二：SSA 形式流图（中间版本）</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><img src="https://upload.wikimedia.org/wikipedia/commons/7/73/SSA_example1.1.png" alt="" /></td>
+      <td style="text-align: center"><img src="https://upload.wikimedia.org/wikipedia/commons/f/f7/SSA_example1.2.png" alt="" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>我们可以发现在右图最底下的基本块中，对于 $y$ 的使用可能来自 $y_1$ 也可能来自 $y_2$，取决于程序是从哪条路径到达该程序点的。为了解决该问题，引入了一条新的语句：$\phi$，该语句会生成一个新的 $y$ 的定义 $y_3$，$y_3$ 的值会根据控制流是从哪条路径到达而选择不同的值 $y_1$ 或 $y_2$:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: center">图三：SSA 形式流图</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: center"><img src="https://upload.wikimedia.org/wikipedia/commons/8/84/SSA_example1.3.png" alt="" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<p>上述的 $\phi$ 函数就是我们所要介绍的 <code class="highlighter-rouge">PHI Node</code>。</p>
+<p align="center">
+$ y_3 \leftarrow \phi (y_1, y_2) $
+</p>
+<p>PHI node 根据控制流是从哪一个 block ( $y_1\leftarrow x_2 * 2$ 或 $y_2\leftarrow x_2 -3$) 到达，来决定使用 $y_1$ 或 $y_2$ 赋值给 $y_3$。</p>
+
+<p><br /></p>
+<h3 id="二phi-nodes-简介">（二）、PHI Nodes 简介</h3>
+<hr />
+<p><br />
+在上一节中我们已经介绍了为什么要引入 <code class="highlighter-rouge">PHI Nodes</code>；本节主要通过一个例子来讲解 PHI Nodes。</p>
+
+<p>回顾一下 PHI Nodes：</p>
+<blockquote>
+  <ul>
+    <li>PHI Nodes 会记录是从哪个 control-flow 过来的，从而使用相应的值（类似多路复用器）。</li>
+    <li>并没有实际实现，只是编译器会保证相应的 virtual registers 映射到了同一个 physical register。</li>
+  </ul>
+</blockquote>
+
+<p>举个例子，以下左图为原程序，右图为相应的 control-flow。
+<br /></p>
+<p><img src="/image/LLVM/PHINode/phinode_no_ssa.png" width="700" /></p>
+
+<p><br />
+当引入 SSA 形式：</p>
+<p><img src="/image/LLVM/PHINode/phinode_ssa.png" width="700" /></p>
+
+<p><br />
+对于一个 PHI node 可以表示为：<br /></p>
+
+<p><code class="highlighter-rouge">%result = phi i32 [value1, BB label1], [value2, BB label2]</code> <br /></p>
+
+<p>当从 label1 所对应的 basic block(BB) 路径到达 PHI node, 则 result 的值为 value1; 同理,当从 label2 所对应的 basic block路径到达 PHI node, 则 result 的值为 value2。</p>
+
+<p><br /></p>
+<h3 id="三参考链接">（三）、参考链接</h3>
+<hr />
+<p><a href="http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes">http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes</a> <br /><a href="https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf">https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf</a> <br />
+<a href="https://llvm.org/doxygen/classllvm_1_1PHINode.html">https://llvm.org/doxygen/classllvm_1_1PHINode.html</a> <br /></p>
+
+
+  </div><a class="u-url" href="/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <!-- <h2 class="footer-heading">CDZ</h2> -->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">CDZ</li><li><a class="u-email" href="mailto:chendianzhang@sjtu.edu.cn">chendianzhang@sjtu.edu.cn</a></li></ul>
+      </div>
+      <!--以下会在 blog 最后显示一些_config.yml 中定义的一些网站的链接, 比如 GitHub 的链接-->
+      <!-- <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/Hicodechar"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">Hicodechar</span></a></li></ul>
+</div> -->
+      <div class="footer-col footer-col-3">
+        <p>Welcome to cdz&#39;s blog. Any questions or suggesions, please contact me.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -1,4 +1,112 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-09T14:11:42+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">Test for blogging</title><link href="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该 blog 用于说明写 blog 的一些格式要求。
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-15T02:21:09+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">SSA Form and PHI Nodes</title><link href="http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" rel="alternate" type="text/html" title="SSA Form and PHI Nodes" /><published>2019-02-14T20:26:29+08:00</published><updated>2019-02-14T20:26:29+08:00</updated><id>http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes</id><content type="html" xml:base="http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html">&lt;p&gt;最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码：&lt;/p&gt;
+&lt;div class=&quot;language-llvm highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;%19&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;phi&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;i1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%entry&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%land.rhs&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;!--more--&gt;
+
+&lt;p&gt;该指令为 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;，为 llvm 中的一个指令类，继承于 &lt;code class=&quot;highlighter-rouge&quot;&gt;llvm::Instruction&lt;/code&gt;，具体继承关系和 llvm 源码见：&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;PHINode 类&lt;/a&gt; &lt;br /&gt;
+本文主要简单介绍一下 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;一ssa-简介&quot;&gt;（一）、SSA 简介&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;
+在正式介绍 PHI Nodes 之前首先需要了解 &lt;code class=&quot;highlighter-rouge&quot;&gt;SSA&lt;/code&gt; ，因为所有的 LLVM IR 指令都是使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;SSA&lt;/code&gt; 形式表示。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;ssa&quot;&gt;SSA&lt;/h4&gt;
+&lt;p&gt;&lt;br /&gt;
+&lt;code class=&quot;highlighter-rouge&quot;&gt;SSA (static single assignment form)&lt;/code&gt; ：&lt;strong&gt;静态一次性赋值&lt;/strong&gt;；意思是说&lt;strong&gt;每个变量（虚拟寄存器）都只能被赋值一次&lt;/strong&gt;；这样做的好处是可以方便优化代码。&lt;/p&gt;
+
+&lt;p&gt;举个例子：&lt;/p&gt;
+&lt;div class=&quot;language-llvm highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;nl&quot;&gt;y :&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;
+ &lt;span class=&quot;nl&quot;&gt;y :&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;
+ &lt;span class=&quot;nl&quot;&gt;x :&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;y&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;显然，在以上代码中我们能够一眼看出第一行代码是多余的，因为在第三行使用的 $y$ 的值是来自第二行对 $y$ 的赋值，而不是来自第一行对 $y$ 的赋值。而对于程序来说并不能直观的得出第一行是多余的，需要做数据流分析才能判断第一行是多余的。$SSA$ 恰好能够解决该问题，以上代码用 $SSA$ 形式来表示的话：&lt;/p&gt;
+&lt;div class=&quot;language-llvm highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt; &lt;span class=&quot;nl&quot;&gt;y1 :&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;1&lt;/span&gt;
+ &lt;span class=&quot;nl&quot;&gt;y2 :&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;
+ &lt;span class=&quot;nl&quot;&gt;x1 :&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;m&quot;&gt;2&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;p&gt;很明显，用以上表示方法程序不需要做数据流分析就能够知道第三行使用的 $y$ 是来自第二行的定义。当然，使用 $SSA$ 还能做很多别的优化，我也没有细看，这里就不再赘述了，有兴趣的话可以参考：&lt;a href=&quot;https://en.wikipedia.org/wiki/Static_single_assignment_form&quot;&gt;维基百科上的介绍&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;生成-ssa-形式的指令&quot;&gt;生成 SSA 形式的指令&lt;/h4&gt;
+&lt;p&gt;&lt;br /&gt;
+我们可以通过探究 $SSA$ 指令的生成知道为什么要引入 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHI Nodes&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;把一个普通程序转化为 $SSA$ 形式，最简单的做法就是把每一次的赋值都赋值给一个新的变量（或者说是同一个变量的不同版本），同时在使用变量的时候，使用能够到达该程序点对应的”版本”。
+举个例子，在下图的控制流图中，左边图一是原程序流图，右图为按照上述方法生成的 SSA 形式的程序流图。&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;图一：原程序流图&lt;/th&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;图二：SSA 形式流图（中间版本）&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/7/73/SSA_example1.1.png&quot; alt=&quot;&quot; /&gt;&lt;/td&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/f/f7/SSA_example1.2.png&quot; alt=&quot;&quot; /&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;我们可以发现在右图最底下的基本块中，对于 $y$ 的使用可能来自 $y_1$ 也可能来自 $y_2$，取决于程序是从哪条路径到达该程序点的。为了解决该问题，引入了一条新的语句：$\phi$，该语句会生成一个新的 $y$ 的定义 $y_3$，$y_3$ 的值会根据控制流是从哪条路径到达而选择不同的值 $y_1$ 或 $y_2$:&lt;/p&gt;
+
+&lt;table&gt;
+  &lt;thead&gt;
+    &lt;tr&gt;
+      &lt;th style=&quot;text-align: center&quot;&gt;图三：SSA 形式流图&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;td style=&quot;text-align: center&quot;&gt;&lt;img src=&quot;https://upload.wikimedia.org/wikipedia/commons/8/84/SSA_example1.3.png&quot; alt=&quot;&quot; /&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;上述的 $\phi$ 函数就是我们所要介绍的 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHI Node&lt;/code&gt;。&lt;/p&gt;
+&lt;p align=&quot;center&quot;&gt;
+$ y_3 \leftarrow \phi (y_1, y_2) $
+&lt;/p&gt;
+&lt;p&gt;PHI node 根据控制流是从哪一个 block ( $y_1\leftarrow x_2 * 2$ 或 $y_2\leftarrow x_2 -3$) 到达，来决定使用 $y_1$ 或 $y_2$ 赋值给 $y_3$。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;二phi-nodes-简介&quot;&gt;（二）、PHI Nodes 简介&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;
+在上一节中我们已经介绍了为什么要引入 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHI Nodes&lt;/code&gt;；本节主要通过一个例子来讲解 PHI Nodes。&lt;/p&gt;
+
+&lt;p&gt;回顾一下 PHI Nodes：&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;ul&gt;
+    &lt;li&gt;PHI Nodes 会记录是从哪个 control-flow 过来的，从而使用相应的值（类似多路复用器）。&lt;/li&gt;
+    &lt;li&gt;并没有实际实现，只是编译器会保证相应的 virtual registers 映射到了同一个 physical register。&lt;/li&gt;
+  &lt;/ul&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;举个例子，以下左图为原程序，右图为相应的 control-flow。
+&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/LLVM/PHINode/phinode_no_ssa.png&quot; width=&quot;700&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+当引入 SSA 形式：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/LLVM/PHINode/phinode_ssa.png&quot; width=&quot;700&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;
+对于一个 PHI node 可以表示为：&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;%result = phi i32 [value1, BB label1], [value2, BB label2]&lt;/code&gt; &lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;当从 label1 所对应的 basic block(BB) 路径到达 PHI node, 则 result 的值为 value1; 同理,当从 label2 所对应的 basic block路径到达 PHI node, 则 result 的值为 value2。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;三参考链接&quot;&gt;（三）、参考链接&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;a href=&quot;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&quot;&gt;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&lt;/a&gt; &lt;br /&gt;&lt;a href=&quot;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&quot;&gt;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;https://llvm.org/doxygen/classllvm_1_1PHINode.html&lt;/a&gt; &lt;br /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码： %19 = phi i1 [ false, %entry ], [ true, %land.rhs ]</summary></entry><entry><title type="html">Test for blogging</title><link href="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该 blog 用于说明写 blog 的一些格式要求。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
