@@ -35,7 +35,8 @@ body {
   font-kerning: normal;
   display: flex;
   min-height: 100vh;
-  flex-direction: column; }
+  flex-direction: column;
+  line-height: 1.5; }
 
 /**
  * Set `margin-bottom` to maintain vertical rhythm
@@ -526,3 +527,75 @@ table {
     color: #008080; }
   .highlight .il {
     color: #099; }
+
+.form {
+  position: relative; }
+
+form {
+  margin: 0 0 5px 0; }
+
+form fieldset {
+  margin-bottom: 5px;
+  padding: 0;
+  border-width: 0; }
+
+fieldset {
+  orphans: 3;
+  widows: 3; }
+
+input[type="submit"] {
+  width: auto;
+  height: auto;
+  cursor: pointer;
+  *overflow: visible; }
+
+textarea {
+  resize: vertical;
+  height: auto;
+  overflow: auto;
+  vertical-align: top; }
+
+fieldset {
+  display: block;
+  margin-inline-start: 2px;
+  margin-inline-end: 2px;
+  padding-block-start: 0.35em;
+  padding-inline-start: 0.75em;
+  padding-inline-end: 0.75em;
+  padding-block-end: 0.625em;
+  min-inline-size: min-content;
+  border-width: 2px;
+  border-style: groove;
+  border-color: threedface;
+  border-image: initial; }
+
+contact_body {
+  margin: 0;
+  padding: 0;
+  color: #092b41;
+  font-family: "Open Sans",-apple-system,".SFNSText-Regular","San Francisco","Roboto","Segoe UI","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+  line-height: 1.5;
+  font-size: 20px; }
+
+input, textarea, c_select {
+  border: 1px solid #dfdfdf; }
+
+input, textarea, c_select {
+  display: inline-block;
+  width: 100%;
+  padding: 0.25em;
+  margin-bottom: 0.5em;
+  color: #092b41;
+  background-color: #dfdfdf;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.125); }
+
+input, button, select, textarea {
+  box-sizing: border-box;
+  font-family: "Open Sans",-apple-system,".SFNSText-Regular","San Francisco","Roboto","Segoe UI","Helvetica Neue","Lucida Grande",Arial,sans-serif; }
+
+button, input, c_select, textarea {
+  margin: 0;
+  font-size: 100%;
+  vertical-align: middle; }

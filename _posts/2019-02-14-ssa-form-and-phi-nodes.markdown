@@ -7,14 +7,19 @@ author: cdz
 excerpt_separator: <!--more-->
 ---
 
+
+本文主要简单介绍 LLVM 中的 `PHINode`。
+
+
+<!--more-->
+
 最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码：
 ```llvm
 %19 = phi i1 [ false, %entry ], [ true, %land.rhs ]
 ```
-<!--more-->
 
 该指令为 `PHINode`，为 llvm 中的一个指令类，继承于 `llvm::Instruction`，具体继承关系和 llvm 源码见：[PHINode 类][phi_node] <br>
-本文主要简单介绍一下 `PHINode`。
+
 
 <br/>
 ### （一）、SSA 简介
@@ -23,7 +28,7 @@ excerpt_separator: <!--more-->
 在正式介绍 PHI Nodes 之前首先需要了解 `SSA` ，因为所有的 LLVM IR 指令都是使用 `SSA` 形式表示。
 
 <br/>
-#### SSA 
+#### （1）、SSA 
 <br/>
 `SSA (static single assignment form)` ：**静态一次性赋值**；意思是说**每个变量（虚拟寄存器）都只能被赋值一次**；这样做的好处是可以方便优化代码。
 
@@ -42,7 +47,7 @@ excerpt_separator: <!--more-->
 很明显，用以上表示方法程序不需要做数据流分析就能够知道第三行使用的 $y$ 是来自第二行的定义。当然，使用 $SSA$ 还能做很多别的优化，我也没有细看，这里就不再赘述了，有兴趣的话可以参考：[维基百科上的介绍][wiki_ssa]
 
 <br/>
-#### 生成 SSA 形式的指令
+#### （2）、生成 SSA 形式的指令
 <br/>
 我们可以通过探究 $SSA$ 指令的生成知道为什么要引入 `PHI Nodes`。
 
@@ -95,12 +100,15 @@ PHI node 根据控制流是从哪一个 block ( $y_1\leftarrow x_2 * 2$ 或 $y_2
 <br>
 ### （三）、参考链接
 ---
-[http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes][ref_1] <br>[https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf][ref_3] <br>
+[http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes][ref_1] <br>
+[https://en.wikipedia.org/wiki/Static_single_assignment_form][ref_2] <br>
+[https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf][ref_3] <br>
 [https://llvm.org/doxygen/classllvm_1_1PHINode.html][ref_4] <br>
 
 
 [phi_node]: https://llvm.org/doxygen/classllvm_1_1PHINode.html
 [wiki_ssa]: https://en.wikipedia.org/wiki/Static_single_assignment_form
 [ref_1]: http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes 
+[ref_2]: https://en.wikipedia.org/wiki/Static_single_assignment_form
 [ref_3]: https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf 
 [ref_4]: https://llvm.org/doxygen/classllvm_1_1PHINode.html 

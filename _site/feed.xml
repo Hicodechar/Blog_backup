@@ -1,10 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-02-15T02:21:09+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">SSA Form and PHI Nodes</title><link href="http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" rel="alternate" type="text/html" title="SSA Form and PHI Nodes" /><published>2019-02-14T20:26:29+08:00</published><updated>2019-02-14T20:26:29+08:00</updated><id>http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes</id><content type="html" xml:base="http://localhost:4000/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html">&lt;p&gt;最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码：&lt;/p&gt;
-&lt;div class=&quot;language-llvm highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;%19&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;phi&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;i1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%entry&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%land.rhs&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2019-02-16T21:03:49+08:00</updated><id>/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">SSA Form and PHI Nodes</title><link href="/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" rel="alternate" type="text/html" title="SSA Form and PHI Nodes" /><published>2019-02-14T20:26:29+08:00</published><updated>2019-02-14T20:26:29+08:00</updated><id>/llvm/tech/2019/02/14/ssa-form-and-phi-nodes</id><content type="html" xml:base="/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html">&lt;p&gt;本文主要简单介绍 LLVM 中的 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;。&lt;/p&gt;
+
 &lt;!--more--&gt;
 
-&lt;p&gt;该指令为 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;，为 llvm 中的一个指令类，继承于 &lt;code class=&quot;highlighter-rouge&quot;&gt;llvm::Instruction&lt;/code&gt;，具体继承关系和 llvm 源码见：&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;PHINode 类&lt;/a&gt; &lt;br /&gt;
-本文主要简单介绍一下 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码：&lt;/p&gt;
+&lt;div class=&quot;language-llvm highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nv&quot;&gt;%19&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;phi&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;i1&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%entry&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nv&quot;&gt;%land.rhs&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;该指令为 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;，为 llvm 中的一个指令类，继承于 &lt;code class=&quot;highlighter-rouge&quot;&gt;llvm::Instruction&lt;/code&gt;，具体继承关系和 llvm 源码见：&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;PHINode 类&lt;/a&gt; &lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h3 id=&quot;一ssa-简介&quot;&gt;（一）、SSA 简介&lt;/h3&gt;
@@ -13,7 +15,7 @@
 在正式介绍 PHI Nodes 之前首先需要了解 &lt;code class=&quot;highlighter-rouge&quot;&gt;SSA&lt;/code&gt; ，因为所有的 LLVM IR 指令都是使用 &lt;code class=&quot;highlighter-rouge&quot;&gt;SSA&lt;/code&gt; 形式表示。&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;h4 id=&quot;ssa&quot;&gt;SSA&lt;/h4&gt;
+&lt;h4 id=&quot;1ssa&quot;&gt;（1）、SSA&lt;/h4&gt;
 &lt;p&gt;&lt;br /&gt;
 &lt;code class=&quot;highlighter-rouge&quot;&gt;SSA (static single assignment form)&lt;/code&gt; ：&lt;strong&gt;静态一次性赋值&lt;/strong&gt;；意思是说&lt;strong&gt;每个变量（虚拟寄存器）都只能被赋值一次&lt;/strong&gt;；这样做的好处是可以方便优化代码。&lt;/p&gt;
 
@@ -30,7 +32,7 @@
 &lt;p&gt;很明显，用以上表示方法程序不需要做数据流分析就能够知道第三行使用的 $y$ 是来自第二行的定义。当然，使用 $SSA$ 还能做很多别的优化，我也没有细看，这里就不再赘述了，有兴趣的话可以参考：&lt;a href=&quot;https://en.wikipedia.org/wiki/Static_single_assignment_form&quot;&gt;维基百科上的介绍&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;h4 id=&quot;生成-ssa-形式的指令&quot;&gt;生成 SSA 形式的指令&lt;/h4&gt;
+&lt;h4 id=&quot;2生成-ssa-形式的指令&quot;&gt;（2）、生成 SSA 形式的指令&lt;/h4&gt;
 &lt;p&gt;&lt;br /&gt;
 我们可以通过探究 $SSA$ 指令的生成知道为什么要引入 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHI Nodes&lt;/code&gt;。&lt;/p&gt;
 
@@ -105,8 +107,10 @@ $ y_3 \leftarrow \phi (y_1, y_2) $
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;h3 id=&quot;三参考链接&quot;&gt;（三）、参考链接&lt;/h3&gt;
 &lt;hr /&gt;
-&lt;p&gt;&lt;a href=&quot;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&quot;&gt;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&lt;/a&gt; &lt;br /&gt;&lt;a href=&quot;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&quot;&gt;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&lt;/a&gt; &lt;br /&gt;
-&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;https://llvm.org/doxygen/classllvm_1_1PHINode.html&lt;/a&gt; &lt;br /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">最近接触到追踪一个变量在程序中的使用。当对 LLVM IR 中 instruction 进行分析的时候，遇到类似如下的代码： %19 = phi i1 [ false, %entry ], [ true, %land.rhs ]</summary></entry><entry><title type="html">Test for blogging</title><link href="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="http://localhost:4000/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该 blog 用于说明写 blog 的一些格式要求。
+&lt;p&gt;&lt;a href=&quot;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&quot;&gt;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://en.wikipedia.org/wiki/Static_single_assignment_form&quot;&gt;https://en.wikipedia.org/wiki/Static_single_assignment_form&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&quot;&gt;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&lt;/a&gt; &lt;br /&gt;
+&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;https://llvm.org/doxygen/classllvm_1_1PHINode.html&lt;/a&gt; &lt;br /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">本文主要简单介绍 LLVM 中的 PHINode。</summary></entry><entry><title type="html">Test for blogging</title><link href="/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该文用于说明写 blog 的一些格式要求。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
@@ -185,7 +189,7 @@ jekyll serve
 &lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; alt=&quot;test_image&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;第二种方法效果：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">该 blog 用于说明写 blog 的一些格式要求。</summary></entry><entry><title type="html">在东北</title><link href="http://localhost:4000/life/travel/2019/02/07/md.html" rel="alternate" type="text/html" title="在东北" /><published>2019-02-07T10:26:57+08:00</published><updated>2019-02-07T10:26:57+08:00</updated><id>http://localhost:4000/life/travel/2019/02/07/md</id><content type="html" xml:base="http://localhost:4000/life/travel/2019/02/07/md.html">&lt;!--more--&gt;
+&lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">该文用于说明写 blog 的一些格式要求。</summary></entry><entry><title type="html">在东北</title><link href="/life/travel/2019/02/07/md.html" rel="alternate" type="text/html" title="在东北" /><published>2019-02-07T10:26:57+08:00</published><updated>2019-02-07T10:26:57+08:00</updated><id>/life/travel/2019/02/07/md</id><content type="html" xml:base="/life/travel/2019/02/07/md.html">&lt;!--more--&gt;
 
 &lt;p&gt;&lt;img src=&quot;/image/DongBei/snow_train.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
 

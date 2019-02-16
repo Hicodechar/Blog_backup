@@ -1,0 +1,148 @@
+// // [cdz]: 为了添加 contact 框而添加
+
+.form {
+    position: relative;
+}
+
+form {
+    margin: 0 0 5px 0;
+}
+// // *, *:before, *:after {
+// //     -moz-box-sizing: border-box;
+// //     -webkit-box-sizing: border-box;
+// //     box-sizing: border-box;
+// // }
+
+form fieldset {
+    margin-bottom: 5px;
+    padding: 0;
+    border-width: 0;
+}
+
+fieldset {
+    orphans: 3;
+    widows: 3;
+}
+
+// // label {
+// //     display: block;
+// //     margin-bottom: 0.25em;
+// //     color: #092b41;
+// //     cursor: pointer;
+// // }
+// // // label, input, button, select, textarea {
+// // //     vertical-align: baseline;
+// // //     *vertical-align: middle;
+// // // }
+
+// // label, input[type="button"], input[type="reset"], input[type="submit"], input[type="radio"], input[type="checkbox"] {
+// //     cursor: pointer;
+// // }
+
+// // input{
+// //     border: 1px solid #dfdfdf;
+// // }
+
+// input{
+//     display: inline-block;
+//     width: 100%;
+//     padding: 0.25em;
+//     margin-bottom: 0.5em;
+//     color: #092b41;
+//     background-color: #dfdfdf;
+//     border: 1px solid #ccc;
+//     border-radius: 4px;
+//     box-shadow: 0 1px 1px rgba(0,0,0,0.125);
+// }
+// input{
+//     box-sizing: border-box;
+//     // font-family: "Open Sans",-apple-system,".SFNSText-Regular","San Francisco","Roboto","Segoe UI","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+// }
+
+input[type="submit"] {
+    width: auto;
+    height: auto;
+    cursor: pointer;
+    *overflow: visible;
+}
+
+textarea {
+    resize: vertical;
+    height: auto;
+    overflow: auto;
+    vertical-align: top;
+}
+
+
+// input, textarea{
+//     display: inline-block;
+//     width: 100%;
+//     padding: 0.25em;
+//     margin-bottom: 0.5em;
+//     color: #092b41;
+//     background-color: #dfdfdf;
+//     border: 1px solid #ccc;
+//     border-radius: 4px;
+//     box-shadow: 0 1px 1px rgba(0,0,0,0.125);
+// }
+
+fieldset {
+    display: block;
+    margin-inline-start: 2px;
+    margin-inline-end: 2px;
+    padding-block-start: 0.35em;
+    padding-inline-start: 0.75em;
+    padding-inline-end: 0.75em;
+    padding-block-end: 0.625em;
+    min-inline-size: min-content;
+    border-width: 2px;
+    border-style: groove;
+    border-color: threedface;
+    border-image: initial;
+}
+
+contact_body {
+    margin: 0;
+    padding: 0;
+    color: #092b41;
+    font-family: "Open Sans",-apple-system,".SFNSText-Regular","San Francisco","Roboto","Segoe UI","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+    line-height: 1.5;
+    font-size: 20px;
+}
+
+input, textarea, c_select {
+    border: 1px solid #dfdfdf;
+}
+input, textarea, c_select {
+    display: inline-block;
+    width: 100%;
+    padding: 0.25em;
+    margin-bottom: 0.5em;
+    color: #092b41;
+    background-color: #dfdfdf;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.125);
+}
+
+input, button, select, textarea {
+    box-sizing: border-box;
+    font-family: "Open Sans",-apple-system,".SFNSText-Regular","San Francisco","Roboto","Segoe UI","Helvetica Neue","Lucida Grande",Arial,sans-serif;
+}
+// c_label, c_input, c_button, c_select, c_textarea {
+//     vertical-align: baseline;
+//     *vertical-align: middle;
+// }
+// c_b, c_i, c_strong, c_em, c_blockquote, c_p, c_q, c_span, c_figure, c_img, c_h1, c_h2, c_header, c_input, c_a, c_tr, c_td, c_form c_button, c_input[type="submit"], .btn, #goog-wm-sb, .highlight, .archive__item-teaser {
+//     -webkit-transition: all 0.2s ease-in-out;
+//     transition: all 0.2s ease-in-out;
+// }
+// c_button, c_input {
+//     *overflow: visible;
+//     line-height: normal;
+// }
+button, input, c_select, textarea {
+    margin: 0;
+    font-size: 100%;
+    vertical-align: middle;
+}

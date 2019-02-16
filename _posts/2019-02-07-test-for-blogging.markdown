@@ -7,7 +7,7 @@ author: cdz
 excerpt_separator: <!--more-->
 ---
 
-该 blog 用于说明写 blog 的一些格式要求。
+该文用于说明写 blog 的一些格式要求。
 <!--more-->
 
 <br/>

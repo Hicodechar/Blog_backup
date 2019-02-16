@@ -9,13 +9,11 @@
 <meta property="og:locale" content="en_US" />
 <meta name="description" content="Welcome to cdz’s blog. Any questions or suggesions, please contact me." />
 <meta property="og:description" content="Welcome to cdz’s blog. Any questions or suggesions, please contact me." />
-<link rel="canonical" href="http://localhost:4000/about/" />
-<meta property="og:url" content="http://localhost:4000/about/" />
 <meta property="og:site_name" content="CDZ" />
 <script type="application/ld+json">
-{"name":"CDZ","description":"Welcome to cdz’s blog. Any questions or suggesions, please contact me.","@type":"WebSite","url":"http://localhost:4000/about/","headline":"About","@context":"http://schema.org"}</script>
+{"name":"CDZ","description":"Welcome to cdz’s blog. Any questions or suggesions, please contact me.","@type":"WebSite","url":"/about/","headline":"About","@context":"http://schema.org"}</script>
 <!-- End Jekyll SEO tag -->
-<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="CDZ" /><!-- [cdz]: 为了 markdown 数学公式 -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="/feed.xml" title="CDZ" /><!-- [cdz]: 为了 markdown 数学公式 -->
   <!-- 参考：
   https://weilai5432.github.io/2017/01/11/MathJax-%E5%9C%A8MarkDown%E4%B8%AD%E6%8F%92%E5%85%A5%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/ -->
   <script type="text/x-mathjax-config">
@@ -51,6 +49,7 @@
 
         <div class="trigger"><a class="page-link" href="/">Home</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/contact.html">Contact</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/categories/Tech"></a><a class="page-link" href="/categories/Life"></a><a class="page-link" href="/categories/Travel.html"></a><a class="page-link" href="/categories/Jekyll"></a><a class="page-link" href="/categories/LLVM"></a></div>
       </nav></div>
+
 </header>
 <main class="page-content" aria-label="Content">
       <div class="wrapper">
@@ -65,6 +64,45 @@
 
 <p>喜欢大海，雪，和西瓜。</p>
 
+<!-- 添加 contact -->
+<p><br />
+<br /></p>
+
+<h2 id="contact">Contact</h2>
+
+<!-- <form method="POST" action="https://formspree.io/chen_dian_zhang@sina.com">
+  <input type="email" name="email" placeholder="Your email">
+  <textarea name="message" placeholder="Test Message"></textarea>
+  <button type="submit">Send Test</button>
+</form> -->
+
+<contact_body style="margin-bottom: 221px;">
+<form class="form" id="contactform" action="https://formspree.io/chen_dian_zhang@sina.com" method="POST">
+    <fieldset class="field">
+        <label class="label" for="name"><span class="label-content">Your name</span></label>
+        <input class="input" type="text" name="name" placeholder="Name" required="" />
+    </fieldset>
+    <fieldset class="field">
+        <label class="label" for="_replyto"><span class="label-content">Your email</span></label>
+        <input class="input" type="email" name="_replyto" placeholder="your_email@example.com" required="" />
+    </fieldset>
+    <fieldset class="field">
+        <label class="label" for="message"><span class="label-content">Your message</span></label>
+        <textarea class="input" name="message" rows="7" placeholder="Message" required=""></textarea>
+    </fieldset>
+    <input class="hidden" type="text" name="_gotcha" style="display:none" />
+    <input class="hidden" type="hidden" name="_subject" value="Message via Super Tech Crew" />
+    <fieldset class="field">
+        <input class="button submit" type="submit" value="Send" />
+    </fieldset>
+</form>
+
+</contact_body>
+
+<p><br /><contact_body>
+Or email:
+<a class="u-email" href="mailto:chendianzhang@sjtu.edu.cn">chendianzhang@sjtu.edu.cn</a>
+</contact_body></p>
 
   </div>
 
