@@ -48,3 +48,7 @@ plugins:
 
 # [cdz]: Show the first paragraph in the home
 show_excerpts: true
+
+# [cdz]: set background image
+url: "blog.dianzhangchen.com"
+background-image: url('/image/DongBei/snow_train.jpg')

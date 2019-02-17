@@ -1,0 +1,35 @@
+
+// [cdz]: 分割线样式
+hr {
+    // display: block;
+    // unicode-bidi: isolate;
+    // margin-block-start: 0.5em;
+    // margin-block-end: 0.5em;
+    // margin-inline-start: auto;
+    // margin-inline-end: auto;
+    // overflow: hidden;
+    // // border-style: solid;
+    // border-top-style: solid;
+    // border-right-style: none;
+    // // border-bottom-style: solid;
+    // border-left-style: none;
+    // border-width: 0.5px;
+    // border-top-width: 0.5px;
+    // border-right-width: 0.5px;
+    // // border-bottom-width: 0.5px;
+    // border-left-width: 0.5px;
+    // color: rgb(232, 232, 232);
+
+    border-top: 0.5px solid #e8e8e8;
+    border-top-color: rgb(232, 232, 232);
+    border-top-style: solid;
+    border-top-width: 0.5px;
+    border-bottom: 0.5px solid #e8e8e8;
+    border-bottom-width: 0.5px;
+    border-bottom-style: solid;
+    border-bottom-color: rgb(232, 232, 232);
+}
+
+.active {
+    color: #ff0;
+}

@@ -1,0 +1,217 @@
+---
+layout: post
+title: "MPX"
+date: 2019-02-17T01:33:43+08:00
+categories: "Tech"
+author: cdz
+excerpt_separator: <!--more-->
+---
+
+本文主要简单介绍 MPX
+
+<!--more-->
+
+<br/>
+### （一）、MPX 简介
+---
+<br/>
+
+`Intel Memory Protection Extensions` (Intel `MPX`)  首次是在 2013 年提出，并在2015年引入到 Intel 的第六代处理器 Skylake. MPX 的目的是为 C/C++ 加入 bounds check 机制，从而保证内存安全。首先，看一下以下代码片段：
+
+```c
+
+   struct obj { char buf[100];  int len }
+1: obj* a[10]                      // Array of pointers to objs
+2: total = 0
+3: for (i=0; i<M; i++):
+4:     ai = a + i                  // Pointer arithmetic on a
+5:     objptr = load ai            // Pointer to obj at a[i]
+6:     lenptr = objptr + 100       // Pointer to obj.len
+7:     len = load lenptr
+8:     total += len                // Total length of all objs
+```
+
+
+
+以上程序分配了一个数组 `a[10]` 的指针, 也就是10个指针，每个指针都指向类型为 `obj` 的对象，然后遍历前 M 个对象，把其中的 len 值相加得到总的len值（3-8行）total 。以上代码对应的 C 语言形式为：
+
+```c
+
+for (i=0; i<M; i++) {
+   total += a[i]->len;
+}
+```
+
+
+
+注意：`ai` 是表示 `a[i]` 的`指针`，同时需要注意 `lenptr` 如何指向对象内部的 len。
+
+
+
+当以上代码应用 `MPX` 之后的代码为：
+
+```c
+
+1: obj* a[10]
+2: a_b = bndmk a, a+79          // Make bounds [a, a+79]
+3: total = 0
+4: for (i=0; i<M; i++):
+5:     ai = a + i
+6:     bndcl a_b, ai            // Lower-bound check of a[i]
+7:     bndcu a_b, ai+7          // Upper-bound check of a[i]
+8:     objptr = load ai
+9:     objptr_b = bndldx ai     // Bounds for pointer at a[i]
+10:    lenptr = objptr + 100
+11:    bndcl objptr_b, lenptr   // Lower-bound check of obj.len
+12:    bndcu objptr_b, lenptr+3 // Upper-bound check of obj.len
+13:    len = load lenptr
+14:    total += len
+```
+
+
+
+首先，`a[10]` 的界限 bounds 在第2行创建（由于这个数组有10个指针，且每个指针的大小为8 bytes，所以上限为 79），然后在第 8 行读入数组中值之前进行边界检查，2个边界检查的命令插入到 load 之前（第6-7行），从而预防 overflow ，注意：由于我们保护的数据大小为8（因为 ai 中的值是个指针），所以上界检查为 `ai+7`。
+
+
+
+这时指向对象 obj 的指针加载到了 `objptr`，那么程序的下一步是要读取 `obj.len` 。根据设计 MPX 也需要保护这个 `objptr` 的读写。那么这个 `objptr` 的界限怎么得到呢？在 MPX 设计中每个存在内存中的指针都有与之对应的 bounds 存储在一个特定的内存位置（后面会讲到），并且可以通过 `bndstx` 和 `bndldx` 指令来获取。所以当从 `ai` 获取 `objptr` 的时候， `objptr` 的界限也使用指令 `bndldx` 通过 `ai` 来获取(第9行). 最后，在读入 len 之前也需要界限检查（第11-12行）。
+
+
+
+**注意**：这里得到 `objptr` 的界限是通过  `objptr 在内存的地址（如 ai）`，而不是 `objptr 所指向的地址（如 objptr 的值）` 来获取的。
+
+
+
+
+
+为了实现上述的 MPX 需要在以下各层作出修改：
+
++ 在 `hardware level` : 添加一系列 128-bits 寄存器，和相应的指令支持，以及通过指令抛 `#BR exception` 。
+
++ 在 `OS level` : 实现  `#BR exception handler` ; 主要是实现两个函数：（1）按需存储界限；（2）当发生界限检查发现出界的情况向用户程序发送相应的信号。
+
++ 在 `Compiler level` 需要添加 MPX 转换 pass，用于插入 MPX 指令来 create、propagate、store 界限，和界限检查。
+
+
+
+本文主要翻译介绍 `hardware level` 的实现，对于其他层的介绍可以阅读参考链接阅读[原文][mpx]。
+
+
+
+
+ 
+<br/>
+### （二）、 Hardware
+---
+<br/>
+
+
+Intel MPX 提供了 7 个新的指令和一系列 128-bits 寄存器。在 `Skylake` 架构中提供的 4 个寄存器是 `bnd0-bnd3`；每个寄存器的低 64 位存储的是边界的下界，高64位存储的是边界的上界。
+
+新添加的指令是：
+
++ `bndmk` : 创建新的界限。
+
++ `bndcl` : 把 `GPR`(general-purpos register) 中指针的值和 `bnd` 中的界限的下界进行比较。
+
++ `bndcu` : 把 `GPR`(general-purpos register) 中指针的值和 `bnd` 中的界限的上界进行比较。
+
++ `bndcn` : 是 `bndcu` 的互补形式，效果一样。
+
++ `bndmov` : 把 `bnd` 寄存器中的值从一个寄存器移动到另一个寄存器，并存入到栈上。
+
++ `bndldx` : 从 `B`ounds `T`ables 中加载界限。
+
++ `bndstx` : 存储界限到 `B`ounds `T`ables 中。
+
+
+
+同时 MPX 还更改了x86-64 的函数调用部分，把参数中的指针界限存入到 `bnd0-bnd3` , 函数返回前，当返回值为指针，则把该指针的界限保存到 `bnd0` 中。 
+
+
+
+对于界限检查使用硬件实现和软件方式相比优势是：
+
++ MPX 新引入了寄存器，从而减少 GPR(general-purpos register) 的负担。
+
++ 由于软件实现方案不能更改函数调用，所以只能使用 function copy, 当参数中函数指针的时候，把指针相应的界限加入到参数中，从而使得参数变得太多。
+
++ 性能问题。
+
+
+
+MPX 有个很好的特性就是向前兼容，MPX 程序能够运行在老的不支持 MPX 的机器上，因为 MPX 指令在老机器上为 `NOP` 指令。同时支持 MPX 的机器能够运行之前的老代码，因为：（1）有一个 `BNDPRESERVE` 位来设置指针没有界限信息；（2）在老代码中，出现对内存中指针的更改的话，那么下一次 `bndldx` 的话会知道这个更改，并把界限设置为 `INIT` 也就是没有界限限制。所以根据以上两点使得在 create 、altered 指针时都能够得到无界限限制的指针，所以便于解决兼容问题。
+
+
+
+
+
+#### Storing bounds in memory
+
+
+
+由于 MPX 只有 4 个 `bnd` 寄存器，这显然是不够的，所以当需要存储的界限超过 4 时需要把界限存储到内存中。一个简单快速的方法为：直接把界限通过 `bndmov` 复制到编译器指定的内存位置 stack。但是，以上方法只能把界限存储到单一的 stack frame 上，如果别的函数还用到这个指针的话将得不到相应的界限。为了解决这个问题，引入了两个新的指令 `bndstx` 和 `bndldx`，这两个指令会 store/load 界限到内存，那么存储到内存的什么位置呢？这个位置是根据 `指针的位置` 计算出来的（注意：是指针的位置而不是指针的值）。所以不需要额外的信息就可以得到指针对应的界限。
+
+
+
+如何根据 `指针的位置` 计算出指针对应的界限呢？
+
+做法是通过两级地址翻译的过程，其实该做法和页表非常相似。每个指针在 `Bounds Table (BT)` 中都有一个 `Bounds Table Entry` 与之对应，该  `Bounds Table Entry` 的大小为 128-bits 内容为：
+
++ LBound
+
++ UBound
+
++ Pointer
+
++ Preserved
+
+
+
+其中， `Bounds Table Entry` 是存储在 `Bounds Table (BT)` 的，而 `Bounds Table (BT)` 的基址是存储在 `Bounds Directory (BD)` 中的。这和 Paging 非常相似：
+
++ `Bounds Table Entry`  $\to$ `Page Table Entry` 
+
++ `Bounds Table`  $\to$ `Page Table` 
+
++ `Bounds Directory`  $\to$ `PageDirectory` 
+
+
+
+翻译过程如下图所以：
+<p  align="center"><img src="/image/MPX/mpx.png" width="500"></p>
+
+
+
++ 首先，需要找到 BD entry：
+
+    - 1）把指针的地址中第 20-47 位左移 3 位（因为 BD entry 的大小位 $2^3$ ）来获取  BD entry 在 BD 中的偏移量。
+
+    - 2）从 `BNDCFGx` 寄存器中获取 `BD 基址` （其中：`BNDCFGU` 对应用户态的，`BNDCFGS` 对应内核态）。
+
+    - 3）把基址和偏移量相加从而得到 BD entry。
+
+
++ 其次，需要找到 BT entry：
+
+    - 4）把指针的地址中第 3-19 位左移 5 位（因为 BT entry 的大小位 $2^5$ ）来获取  BT entry 在 BT 中的偏移量。
+
+    - 5）把上一步获取的 BD entry右移 3 位（用于删除前 3 位包含的 metadata）来获取  BT 基址。
+
+    - 6）把基址和偏移量相加从而得到 BT entry。
+
+    - 7）Load BT entry。
+
+
+
+注意：在 BT entry 中存储了指针的值，其用处是每次找到这个 BT entry 后需要把指针值和 BT entry中的指针值进行比较，如果不相等则默认这个指针的界限为 `INIT` ，主要用于兼容性考虑。
+
+
+
+
+<br/>
+### （三）、参考：
+
+[https://intel-mpx.github.io/design/][mpx]
+
+[mpx]: https://intel-mpx.github.io/design/ 

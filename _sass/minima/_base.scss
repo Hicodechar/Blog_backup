@@ -26,7 +26,8 @@ body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.8;
 }
 
 // body {
@@ -191,6 +192,7 @@ pre {
   padding-right: $spacing-unit;
   padding-left: $spacing-unit;
   @extend %clearfix;
+
 
   @include media-query($on-laptop) {
     max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit}));

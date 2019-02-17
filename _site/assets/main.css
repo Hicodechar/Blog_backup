@@ -24,8 +24,8 @@ dl, dd, ol, ul, figure {
  * Basic styling
  */
 body {
-  font: 400 16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  color: #111;
+  font: 400 16px/1.8 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  color: #333;
   background-color: #fdfdfd;
   -webkit-text-size-adjust: 100%;
   -webkit-font-feature-settings: "kern" 1;
@@ -36,7 +36,8 @@ body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  line-height: 1.5; }
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.8; }
 
 /**
  * Set `margin-bottom` to maintain vertical rhythm
@@ -95,7 +96,7 @@ a {
   a:visited {
     color: #1756a9; }
   a:hover {
-    color: #111;
+    color: #333;
     text-decoration: underline; }
   .social-media-list a:hover {
     text-decoration: none; }
@@ -140,16 +141,16 @@ pre {
  * Wrapper
  */
 .wrapper {
-  max-width: -webkit-calc(800px - (30px * 2));
-  max-width: calc(800px - (30px * 2));
+  max-width: -webkit-calc(850px - (30px * 2));
+  max-width: calc(850px - (30px * 2));
   margin-right: auto;
   margin-left: auto;
   padding-right: 30px;
   padding-left: 30px; }
   @media screen and (max-width: 800px) {
     .wrapper {
-      max-width: -webkit-calc(800px - (30px));
-      max-width: calc(800px - (30px));
+      max-width: -webkit-calc(850px - (30px));
+      max-width: calc(850px - (30px));
       padding-right: 15px;
       padding-left: 15px; } }
 
@@ -182,7 +183,7 @@ table {
   margin-bottom: 30px;
   width: 100%;
   text-align: left;
-  color: #3f3f3f;
+  color: #616161;
   border-collapse: collapse;
   border: 1px solid #e8e8e8; }
   table tr:nth-child(even) {
@@ -208,7 +209,7 @@ table {
 .site-title {
   font-size: 26px;
   font-weight: 300;
-  line-height: 54px;
+  line-height: 64.8px;
   letter-spacing: -1px;
   margin-bottom: 0;
   float: left; }
@@ -217,15 +218,20 @@ table {
 
 .site-nav {
   float: right;
-  line-height: 54px; }
+  line-height: 64.8px; }
   .site-nav .nav-trigger {
     display: none; }
   .site-nav .menu-icon {
     display: none; }
   .site-nav .page-link {
-    color: #111;
-    line-height: 1.5; }
+    color: #333;
+    line-height: 1.8; }
     .site-nav .page-link:not(:last-child) {
+      margin-right: 20px; }
+  .site-nav .page-link-current {
+    color: #0085ff;
+    line-height: 1.8; }
+    .site-nav .page-link-current:not(:last-child) {
       margin-right: 20px; }
   @media screen and (max-width: 600px) {
     .site-nav {
@@ -323,7 +329,8 @@ table {
  */
 .page-content {
   padding: 30px 0;
-  flex: 1; }
+  flex: 1;
+  background-color: #fff; }
 
 .page-heading {
   font-size: 32px; }
@@ -599,3 +606,16 @@ button, input, c_select, textarea {
   margin: 0;
   font-size: 100%;
   vertical-align: middle; }
+
+hr {
+  border-top: 0.5px solid #e8e8e8;
+  border-top-color: #e8e8e8;
+  border-top-style: solid;
+  border-top-width: 0.5px;
+  border-bottom: 0.5px solid #e8e8e8;
+  border-bottom-width: 0.5px;
+  border-bottom-style: solid;
+  border-bottom-color: #e8e8e8; }
+
+.active {
+  color: #ff0; }

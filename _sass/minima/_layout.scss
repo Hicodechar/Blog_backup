@@ -8,6 +8,11 @@
 
   // Positioning context for the mobile navigation icon
   position: relative;
+  // [cdz]: add background image.
+  // padding: 1em;
+  // background: url(/image/DongBei/snow_train.jpg) no-repeat center;
+  // background-size: cover;
+  // color: #fff;
 }
 
 .site-title {
@@ -45,6 +50,17 @@
       margin-right: 20px;
     }
   }
+
+// [cdz]: 当前页标签的设置
+.page-link-current {
+  color: #0085ff;
+  line-height: $base-line-height;
+
+  // Gaps between nav items, but not on the last one
+  &:not(:last-child) {
+    margin-right: 20px;
+  }
+}
 
   @include media-query($on-palm) {
     position: absolute;
@@ -178,6 +194,7 @@
 .page-content {
   padding: $spacing-unit 0;
   flex: 1;
+  background-color: #fff;
 }
 
 .page-heading {
@@ -228,6 +245,7 @@
 
 .post-content {
   margin-bottom: $spacing-unit;
+  // background-color: #f9f9f9;
 
   h2 {
     @include relative-font-size(2);

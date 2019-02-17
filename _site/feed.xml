@@ -1,4 +1,210 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2019-02-16T21:03:49+08:00</updated><id>/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">SSA Form and PHI Nodes</title><link href="/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" rel="alternate" type="text/html" title="SSA Form and PHI Nodes" /><published>2019-02-14T20:26:29+08:00</published><updated>2019-02-14T20:26:29+08:00</updated><id>/llvm/tech/2019/02/14/ssa-form-and-phi-nodes</id><content type="html" xml:base="/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html">&lt;p&gt;本文主要简单介绍 LLVM 中的 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;。&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="blog.dianzhangchen.com/feed.xml" rel="self" type="application/atom+xml" /><link href="blog.dianzhangchen.com/" rel="alternate" type="text/html" /><updated>2019-02-17T18:08:07+08:00</updated><id>blog.dianzhangchen.com/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">MPX</title><link href="blog.dianzhangchen.com/tech/2019/02/17/mpx.html" rel="alternate" type="text/html" title="MPX" /><published>2019-02-17T01:33:43+08:00</published><updated>2019-02-17T01:33:43+08:00</updated><id>blog.dianzhangchen.com/tech/2019/02/17/mpx</id><content type="html" xml:base="blog.dianzhangchen.com/tech/2019/02/17/mpx.html">&lt;p&gt;本文主要简单介绍 MPX&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;一mpx-简介&quot;&gt;（一）、MPX 简介&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Intel Memory Protection Extensions&lt;/code&gt; (Intel &lt;code class=&quot;highlighter-rouge&quot;&gt;MPX&lt;/code&gt;)  首次是在 2013 年提出，并在2015年引入到 Intel 的第六代处理器 Skylake. MPX 的目的是为 C/C++ 加入 bounds check 机制，从而保证内存安全。首先，看一下以下代码片段：&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+   &lt;span class=&quot;k&quot;&gt;struct&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;kt&quot;&gt;char&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;buf&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;  &lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;                      &lt;span class=&quot;c1&quot;&gt;// Array of pointers to objs&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;M&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;ai&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;                  &lt;span class=&quot;c1&quot;&gt;// Pointer arithmetic on a&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;objptr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ai&lt;/span&gt;            &lt;span class=&quot;c1&quot;&gt;// Pointer to obj at a[i]&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;lenptr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;objptr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;       &lt;span class=&quot;c1&quot;&gt;// Pointer to obj.len&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lenptr&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;                &lt;span class=&quot;c1&quot;&gt;// Total length of all objs&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;以上程序分配了一个数组 &lt;code class=&quot;highlighter-rouge&quot;&gt;a[10]&lt;/code&gt; 的指针, 也就是10个指针，每个指针都指向类型为 &lt;code class=&quot;highlighter-rouge&quot;&gt;obj&lt;/code&gt; 的对象，然后遍历前 M 个对象，把其中的 len 值相加得到总的len值（3-8行）total 。以上代码对应的 C 语言形式为：&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;M&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+   &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&amp;gt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;注意：&lt;code class=&quot;highlighter-rouge&quot;&gt;ai&lt;/code&gt; 是表示 &lt;code class=&quot;highlighter-rouge&quot;&gt;a[i]&lt;/code&gt; 的&lt;code class=&quot;highlighter-rouge&quot;&gt;指针&lt;/code&gt;，同时需要注意 &lt;code class=&quot;highlighter-rouge&quot;&gt;lenptr&lt;/code&gt; 如何指向对象内部的 len。&lt;/p&gt;
+
+&lt;p&gt;当以上代码应用 &lt;code class=&quot;highlighter-rouge&quot;&gt;MPX&lt;/code&gt; 之后的代码为：&lt;/p&gt;
+
+&lt;div class=&quot;language-c highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
+&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;obj&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a_b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bndmk&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;79&lt;/span&gt;          &lt;span class=&quot;c1&quot;&gt;// Make bounds [a, a+79]&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;M&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;++&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;ai&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;bndcl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a_b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ai&lt;/span&gt;            &lt;span class=&quot;c1&quot;&gt;// Lower-bound check of a[i]&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;bndcu&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;a_b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ai&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;          &lt;span class=&quot;c1&quot;&gt;// Upper-bound check of a[i]&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;objptr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ai&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;     &lt;span class=&quot;n&quot;&gt;objptr_b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;bndldx&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ai&lt;/span&gt;     &lt;span class=&quot;c1&quot;&gt;// Bounds for pointer at a[i]&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;lenptr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;objptr&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;bndcl&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;objptr_b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lenptr&lt;/span&gt;   &lt;span class=&quot;c1&quot;&gt;// Lower-bound check of obj.len&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;bndcu&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;objptr_b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lenptr&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;+&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// Upper-bound check of obj.len&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;13&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;lenptr&lt;/span&gt;
+&lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt;    &lt;span class=&quot;n&quot;&gt;total&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;len&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;首先，&lt;code class=&quot;highlighter-rouge&quot;&gt;a[10]&lt;/code&gt; 的界限 bounds 在第2行创建（由于这个数组有10个指针，且每个指针的大小为8 bytes，所以上限为 79），然后在第 8 行读入数组中值之前进行边界检查，2个边界检查的命令插入到 load 之前（第6-7行），从而预防 overflow ，注意：由于我们保护的数据大小为8（因为 ai 中的值是个指针），所以上界检查为 &lt;code class=&quot;highlighter-rouge&quot;&gt;ai+7&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;这时指向对象 obj 的指针加载到了 &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr&lt;/code&gt;，那么程序的下一步是要读取 &lt;code class=&quot;highlighter-rouge&quot;&gt;obj.len&lt;/code&gt; 。根据设计 MPX 也需要保护这个 &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr&lt;/code&gt; 的读写。那么这个 &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr&lt;/code&gt; 的界限怎么得到呢？在 MPX 设计中每个存在内存中的指针都有与之对应的 bounds 存储在一个特定的内存位置（后面会讲到），并且可以通过 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndstx&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndldx&lt;/code&gt; 指令来获取。所以当从 &lt;code class=&quot;highlighter-rouge&quot;&gt;ai&lt;/code&gt; 获取 &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr&lt;/code&gt; 的时候， &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr&lt;/code&gt; 的界限也使用指令 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndldx&lt;/code&gt; 通过 &lt;code class=&quot;highlighter-rouge&quot;&gt;ai&lt;/code&gt; 来获取(第9行). 最后，在读入 len 之前也需要界限检查（第11-12行）。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;注意&lt;/strong&gt;：这里得到 &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr&lt;/code&gt; 的界限是通过  &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr 在内存的地址（如 ai）&lt;/code&gt;，而不是 &lt;code class=&quot;highlighter-rouge&quot;&gt;objptr 所指向的地址（如 objptr 的值）&lt;/code&gt; 来获取的。&lt;/p&gt;
+
+&lt;p&gt;为了实现上述的 MPX 需要在以下各层作出修改：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;在 &lt;code class=&quot;highlighter-rouge&quot;&gt;hardware level&lt;/code&gt; : 添加一系列 128-bits 寄存器，和相应的指令支持，以及通过指令抛 &lt;code class=&quot;highlighter-rouge&quot;&gt;#BR exception&lt;/code&gt; 。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;在 &lt;code class=&quot;highlighter-rouge&quot;&gt;OS level&lt;/code&gt; : 实现  &lt;code class=&quot;highlighter-rouge&quot;&gt;#BR exception handler&lt;/code&gt; ; 主要是实现两个函数：（1）按需存储界限；（2）当发生界限检查发现出界的情况向用户程序发送相应的信号。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;在 &lt;code class=&quot;highlighter-rouge&quot;&gt;Compiler level&lt;/code&gt; 需要添加 MPX 转换 pass，用于插入 MPX 指令来 create、propagate、store 界限，和界限检查。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;本文主要翻译介绍 &lt;code class=&quot;highlighter-rouge&quot;&gt;hardware level&lt;/code&gt; 的实现，对于其他层的介绍可以阅读参考链接阅读&lt;a href=&quot;https://intel-mpx.github.io/design/&quot;&gt;原文&lt;/a&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;二-hardware&quot;&gt;（二）、 Hardware&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;Intel MPX 提供了 7 个新的指令和一系列 128-bits 寄存器。在 &lt;code class=&quot;highlighter-rouge&quot;&gt;Skylake&lt;/code&gt; 架构中提供的 4 个寄存器是 &lt;code class=&quot;highlighter-rouge&quot;&gt;bnd0-bnd3&lt;/code&gt;；每个寄存器的低 64 位存储的是边界的下界，高64位存储的是边界的上界。&lt;/p&gt;
+
+&lt;p&gt;新添加的指令是：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bndmk&lt;/code&gt; : 创建新的界限。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bndcl&lt;/code&gt; : 把 &lt;code class=&quot;highlighter-rouge&quot;&gt;GPR&lt;/code&gt;(general-purpos register) 中指针的值和 &lt;code class=&quot;highlighter-rouge&quot;&gt;bnd&lt;/code&gt; 中的界限的下界进行比较。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bndcu&lt;/code&gt; : 把 &lt;code class=&quot;highlighter-rouge&quot;&gt;GPR&lt;/code&gt;(general-purpos register) 中指针的值和 &lt;code class=&quot;highlighter-rouge&quot;&gt;bnd&lt;/code&gt; 中的界限的上界进行比较。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bndcn&lt;/code&gt; : 是 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndcu&lt;/code&gt; 的互补形式，效果一样。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bndmov&lt;/code&gt; : 把 &lt;code class=&quot;highlighter-rouge&quot;&gt;bnd&lt;/code&gt; 寄存器中的值从一个寄存器移动到另一个寄存器，并存入到栈上。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bndldx&lt;/code&gt; : 从 &lt;code class=&quot;highlighter-rouge&quot;&gt;B&lt;/code&gt;ounds &lt;code class=&quot;highlighter-rouge&quot;&gt;T&lt;/code&gt;ables 中加载界限。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bndstx&lt;/code&gt; : 存储界限到 &lt;code class=&quot;highlighter-rouge&quot;&gt;B&lt;/code&gt;ounds &lt;code class=&quot;highlighter-rouge&quot;&gt;T&lt;/code&gt;ables 中。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;同时 MPX 还更改了x86-64 的函数调用部分，把参数中的指针界限存入到 &lt;code class=&quot;highlighter-rouge&quot;&gt;bnd0-bnd3&lt;/code&gt; , 函数返回前，当返回值为指针，则把该指针的界限保存到 &lt;code class=&quot;highlighter-rouge&quot;&gt;bnd0&lt;/code&gt; 中。&lt;/p&gt;
+
+&lt;p&gt;对于界限检查使用硬件实现和软件方式相比优势是：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;MPX 新引入了寄存器，从而减少 GPR(general-purpos register) 的负担。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;由于软件实现方案不能更改函数调用，所以只能使用 function copy, 当参数中函数指针的时候，把指针相应的界限加入到参数中，从而使得参数变得太多。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;性能问题。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;MPX 有个很好的特性就是向前兼容，MPX 程序能够运行在老的不支持 MPX 的机器上，因为 MPX 指令在老机器上为 &lt;code class=&quot;highlighter-rouge&quot;&gt;NOP&lt;/code&gt; 指令。同时支持 MPX 的机器能够运行之前的老代码，因为：（1）有一个 &lt;code class=&quot;highlighter-rouge&quot;&gt;BNDPRESERVE&lt;/code&gt; 位来设置指针没有界限信息；（2）在老代码中，出现对内存中指针的更改的话，那么下一次 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndldx&lt;/code&gt; 的话会知道这个更改，并把界限设置为 &lt;code class=&quot;highlighter-rouge&quot;&gt;INIT&lt;/code&gt; 也就是没有界限限制。所以根据以上两点使得在 create 、altered 指针时都能够得到无界限限制的指针，所以便于解决兼容问题。&lt;/p&gt;
+
+&lt;h4 id=&quot;storing-bounds-in-memory&quot;&gt;Storing bounds in memory&lt;/h4&gt;
+
+&lt;p&gt;由于 MPX 只有 4 个 &lt;code class=&quot;highlighter-rouge&quot;&gt;bnd&lt;/code&gt; 寄存器，这显然是不够的，所以当需要存储的界限超过 4 时需要把界限存储到内存中。一个简单快速的方法为：直接把界限通过 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndmov&lt;/code&gt; 复制到编译器指定的内存位置 stack。但是，以上方法只能把界限存储到单一的 stack frame 上，如果别的函数还用到这个指针的话将得不到相应的界限。为了解决这个问题，引入了两个新的指令 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndstx&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;bndldx&lt;/code&gt;，这两个指令会 store/load 界限到内存，那么存储到内存的什么位置呢？这个位置是根据 &lt;code class=&quot;highlighter-rouge&quot;&gt;指针的位置&lt;/code&gt; 计算出来的（注意：是指针的位置而不是指针的值）。所以不需要额外的信息就可以得到指针对应的界限。&lt;/p&gt;
+
+&lt;p&gt;如何根据 &lt;code class=&quot;highlighter-rouge&quot;&gt;指针的位置&lt;/code&gt; 计算出指针对应的界限呢？&lt;/p&gt;
+
+&lt;p&gt;做法是通过两级地址翻译的过程，其实该做法和页表非常相似。每个指针在 &lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table (BT)&lt;/code&gt; 中都有一个 &lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table Entry&lt;/code&gt; 与之对应，该  &lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table Entry&lt;/code&gt; 的大小为 128-bits 内容为：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;LBound&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;UBound&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Pointer&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Preserved&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;其中， &lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table Entry&lt;/code&gt; 是存储在 &lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table (BT)&lt;/code&gt; 的，而 &lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table (BT)&lt;/code&gt; 的基址是存储在 &lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Directory (BD)&lt;/code&gt; 中的。这和 Paging 非常相似：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table Entry&lt;/code&gt;  $\to$ &lt;code class=&quot;highlighter-rouge&quot;&gt;Page Table Entry&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Table&lt;/code&gt;  $\to$ &lt;code class=&quot;highlighter-rouge&quot;&gt;Page Table&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Bounds Directory&lt;/code&gt;  $\to$ &lt;code class=&quot;highlighter-rouge&quot;&gt;PageDirectory&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;翻译过程如下图所以：&lt;/p&gt;
+&lt;p align=&quot;center&quot;&gt;&lt;img src=&quot;/image/MPX/mpx.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;首先，需要找到 BD entry：&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;
+        &lt;p&gt;1）把指针的地址中第 20-47 位左移 3 位（因为 BD entry 的大小位 $2^3$ ）来获取  BD entry 在 BD 中的偏移量。&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;2）从 &lt;code class=&quot;highlighter-rouge&quot;&gt;BNDCFGx&lt;/code&gt; 寄存器中获取 &lt;code class=&quot;highlighter-rouge&quot;&gt;BD 基址&lt;/code&gt; （其中：&lt;code class=&quot;highlighter-rouge&quot;&gt;BNDCFGU&lt;/code&gt; 对应用户态的，&lt;code class=&quot;highlighter-rouge&quot;&gt;BNDCFGS&lt;/code&gt; 对应内核态）。&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;3）把基址和偏移量相加从而得到 BD entry。&lt;/p&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;其次，需要找到 BT entry：&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;
+        &lt;p&gt;4）把指针的地址中第 3-19 位左移 5 位（因为 BT entry 的大小位 $2^5$ ）来获取  BT entry 在 BT 中的偏移量。&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;5）把上一步获取的 BD entry右移 3 位（用于删除前 3 位包含的 metadata）来获取  BT 基址。&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;6）把基址和偏移量相加从而得到 BT entry。&lt;/p&gt;
+      &lt;/li&gt;
+      &lt;li&gt;
+        &lt;p&gt;7）Load BT entry。&lt;/p&gt;
+      &lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;注意：在 BT entry 中存储了指针的值，其用处是每次找到这个 BT entry 后需要把指针值和 BT entry中的指针值进行比较，如果不相等则默认这个指针的界限为 &lt;code class=&quot;highlighter-rouge&quot;&gt;INIT&lt;/code&gt; ，主要用于兼容性考虑。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h3 id=&quot;三参考&quot;&gt;（三）、参考：&lt;/h3&gt;
+
+&lt;p&gt;&lt;a href=&quot;https://intel-mpx.github.io/design/&quot;&gt;https://intel-mpx.github.io/design/&lt;/a&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">本文主要简单介绍 MPX</summary></entry><entry><title type="html">SSA Form and PHI Nodes</title><link href="blog.dianzhangchen.com/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html" rel="alternate" type="text/html" title="SSA Form and PHI Nodes" /><published>2019-02-14T20:26:29+08:00</published><updated>2019-02-14T20:26:29+08:00</updated><id>blog.dianzhangchen.com/llvm/tech/2019/02/14/ssa-form-and-phi-nodes</id><content type="html" xml:base="blog.dianzhangchen.com/llvm/tech/2019/02/14/ssa-form-and-phi-nodes.html">&lt;p&gt;本文主要简单介绍 LLVM 中的 &lt;code class=&quot;highlighter-rouge&quot;&gt;PHINode&lt;/code&gt;。&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -110,7 +316,7 @@ $ y_3 \leftarrow \phi (y_1, y_2) $
 &lt;p&gt;&lt;a href=&quot;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&quot;&gt;http://www.llvmpy.org/llvmpy-doc/dev/doc/llvm_concepts.html#ssa-form-and-phi-nodes&lt;/a&gt; &lt;br /&gt;
 &lt;a href=&quot;https://en.wikipedia.org/wiki/Static_single_assignment_form&quot;&gt;https://en.wikipedia.org/wiki/Static_single_assignment_form&lt;/a&gt; &lt;br /&gt;
 &lt;a href=&quot;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&quot;&gt;https://cs.uni-paderborn.de/fileadmin/informatik/fg/hit/teaching/SS2017/HWSW-Codesign/02-Compiler-LLVM.pdf&lt;/a&gt; &lt;br /&gt;
-&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;https://llvm.org/doxygen/classllvm_1_1PHINode.html&lt;/a&gt; &lt;br /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">本文主要简单介绍 LLVM 中的 PHINode。</summary></entry><entry><title type="html">Test for blogging</title><link href="/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该文用于说明写 blog 的一些格式要求。
+&lt;a href=&quot;https://llvm.org/doxygen/classllvm_1_1PHINode.html&quot;&gt;https://llvm.org/doxygen/classllvm_1_1PHINode.html&lt;/a&gt; &lt;br /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">本文主要简单介绍 LLVM 中的 PHINode。</summary></entry><entry><title type="html">Test for blogging</title><link href="blog.dianzhangchen.com/jekyll/tech/2019/02/07/test-for-blogging.html" rel="alternate" type="text/html" title="Test for blogging" /><published>2019-02-07T12:55:13+08:00</published><updated>2019-02-07T12:55:13+08:00</updated><id>blog.dianzhangchen.com/jekyll/tech/2019/02/07/test-for-blogging</id><content type="html" xml:base="blog.dianzhangchen.com/jekyll/tech/2019/02/07/test-for-blogging.html">&lt;p&gt;该文用于说明写 blog 的一些格式要求。
 &lt;!--more--&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;/p&gt;
@@ -189,7 +395,7 @@ jekyll serve
 &lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; alt=&quot;test_image&quot; class=&quot;img-responsive&quot; /&gt;&lt;/p&gt;
 
 &lt;p&gt;第二种方法效果：&lt;/p&gt;
-&lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">该文用于说明写 blog 的一些格式要求。</summary></entry><entry><title type="html">在东北</title><link href="/life/travel/2019/02/07/md.html" rel="alternate" type="text/html" title="在东北" /><published>2019-02-07T10:26:57+08:00</published><updated>2019-02-07T10:26:57+08:00</updated><id>/life/travel/2019/02/07/md</id><content type="html" xml:base="/life/travel/2019/02/07/md.html">&lt;!--more--&gt;
+&lt;p&gt;&lt;img src=&quot;/image/test/icon.ico&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">该文用于说明写 blog 的一些格式要求。</summary></entry><entry><title type="html">在东北</title><link href="blog.dianzhangchen.com/life/travel/2019/02/07/md.html" rel="alternate" type="text/html" title="在东北" /><published>2019-02-07T10:26:57+08:00</published><updated>2019-02-07T10:26:57+08:00</updated><id>blog.dianzhangchen.com/life/travel/2019/02/07/md</id><content type="html" xml:base="blog.dianzhangchen.com/life/travel/2019/02/07/md.html">&lt;!--more--&gt;
 
 &lt;p&gt;&lt;img src=&quot;/image/DongBei/snow_train.jpg&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
 
