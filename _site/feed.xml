@@ -1,4 +1,282 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-04-11T18:42:39+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">Graph Processing</title><link href="http://localhost:4000/tech/graph/distributed_system/2019/04/11/graph-processing.html" rel="alternate" type="text/html" title="Graph Processing" /><published>2019-04-11T16:42:14+08:00</published><updated>2019-04-11T16:42:14+08:00</updated><id>http://localhost:4000/tech/graph/distributed_system/2019/04/11/graph-processing</id><content type="html" xml:base="http://localhost:4000/tech/graph/distributed_system/2019/04/11/graph-processing.html">&lt;p&gt;本文主要简单介绍一些主流的图处理算法&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2019-04-11T21:22:35+08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">MapReduce</title><link href="http://localhost:4000/tech/distributed_system/2019/04/11/mapreduce.html" rel="alternate" type="text/html" title="MapReduce" /><published>2019-04-11T20:44:48+08:00</published><updated>2019-04-11T20:44:48+08:00</updated><id>http://localhost:4000/tech/distributed_system/2019/04/11/mapreduce</id><content type="html" xml:base="http://localhost:4000/tech/distributed_system/2019/04/11/mapreduce.html">&lt;p&gt;本文简单介绍分布式计算框架 MapReduce 
+&lt;!--more--&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;一引入&quot;&gt;（一）、引入&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;MapReduce&lt;/strong&gt; 的设计灵感来源于 Python 中的 $map$ 和 $reduce$ 函数。首先来看一下这两个函数是什么样的：&lt;/p&gt;
+
+&lt;p&gt;$map$ : 接收一个函数 $f$ 和 一个数组 $list$ （或者可以 iterate 的一串数据） , 然后把该函数运用在该数组中的每个元素（element）&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/1_map.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;$reduce$：接收一个函数 $g$ 和 一个数组 $list$ ；然后对该 list 中的前两个元素运行函数 $g$ ，生成的结果当成 list 的一个元素，然后递归取前两个元素再次运行函数 $g$ 。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/2_reduce.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;实例&quot;&gt;实例：&lt;/h4&gt;
+
+&lt;p&gt;问题：给定一个数组，求该数组中每个元素都平方，然后相加的结果。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/3_map_reduce.png&quot; width=&quot;700&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;所以以上的执行过程可以看成：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/4_map_reduce.png&quot; width=&quot;400&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;mapper&lt;/strong&gt;：就是传给 $map$ 函数的处理函数；如以上例子的 $f$。
+&lt;strong&gt;reducer&lt;/strong&gt;：就是传给 $reduce$ 函数的处理函数；如以上例子的 $g$。&lt;/p&gt;
+
+&lt;p&gt;关键就在于程序员只需要去实现：$maper$ 和 $reducer$ 函数。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;二mapreduce&quot;&gt;（二）、MapReduce&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/5_relationship.png&quot; width=&quot;300&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;可以把 MapReduce 看成是 $map+reduce$ &lt;code class=&quot;highlighter-rouge&quot;&gt;by key&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;$mapper$ 函数并不是返回一个 value，而是返回一个 &lt;strong&gt;key-value&lt;/strong&gt; 对（可能很多有相同的 key ）&lt;/li&gt;
+  &lt;li&gt;在调用 $reducer$ 函数之前，需要把所有 key 值相同的结果存到一起。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;21-过程&quot;&gt;2.1 过程&lt;/h4&gt;
+
+&lt;p&gt;对于普通的 map＋reduce 的过程如图所示：&lt;/p&gt;
+
+&lt;p&gt;给定 item ，通过 mapper 函数得到新的 value，然后再通过 reducer 函数得到最终结果。&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/6_map_reduce.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;而对于 $MapReduce$ 的过程为：&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;给定输入 items ；通过 mapper 函数最终得到 &lt;strong&gt;key-value&lt;/strong&gt; pair&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;execution engine 会把所有相同的 key 归类到一起。也就是 &lt;strong&gt;Shuffle过程&lt;/strong&gt;（并不是程序员来完成）&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;最后 reducer 会根据 key 来完成整合，最后得到 &lt;strong&gt;key-value&lt;/strong&gt; 对。（每一种 key 用一次 reducer 函数；当然，每个 reduce worker 可以处理多个 key）&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/7_MapReduce.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;22-实例&quot;&gt;2.2 实例&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/8_example1.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/9_example2.png&quot; width=&quot;700&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/10_example3.png&quot; width=&quot;700&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;三mapreduce-系统架构&quot;&gt;（三）、MapReduce 系统架构&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/11_mapreduce_architecture.png&quot; width=&quot;600&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;首先，我们有个用户进程来协调程序如何运行。如它会根据数据规模来判断需要把任务拆分给多少个 mapper 和 reducer 去完成。
+当它认为需要 5 个 mapper 去完成时，就会把数据拆成 5 份。&lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;接着产生很多 woker （map woker 和 reduce woker）；而且还会产生一个 &lt;strong&gt;master worker&lt;/strong&gt;，这个 $master$ 会作为用户的代理来协调整个过程，这样的话用户就可以去做别的事了。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;$master$ 就会告诉 worker 去拿相应的数据（也就是分配数据的过程）。&lt;/li&gt;
+  &lt;li&gt;map worker 就会本地完成 map 操作。&lt;/li&gt;
+  &lt;li&gt;当 map 完成之后，$master$ 就会通知 reduce worker 去拿数据。&lt;/li&gt;
+  &lt;li&gt;$reducer$ 完成 reduce 操作&lt;/li&gt;
+  &lt;li&gt;最后把结果写到最终的文件中。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;所以总结为：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;strong&gt;split&lt;/strong&gt; : 数据切分，分给不同的 map worker。（map worker 去拿数据）&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;map&lt;/strong&gt; : map worker 本地调用 mapper 函数&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;Shuffle&lt;/strong&gt; : 把数据分配给不同的 reduce worker （相同的 key 的数据给同一个 reduce worker）&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;reduce&lt;/strong&gt; ：reducer 完成 reduce 操作&lt;/li&gt;
+  &lt;li&gt;&lt;strong&gt;finalize&lt;/strong&gt; ：数据整合&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;四mapreduce-完整过程&quot;&gt;（四）、MapReduce 完整过程&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;step1-split-input-files-into-chunks-shards&quot;&gt;Step1 ：split input files into chunks (shards)&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;切分数据成成很多 shard&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/12_split.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;注意&lt;/code&gt;： $\color{blue}{shards 的数量 M» worker 的数量}$&lt;/p&gt;
+
+&lt;p&gt;原因：对于每个 worker 输入大小一样时并不能保证执行 shard 的时间一样（各个机器的执行速度并不一样）；所以说每个 worker 分配一个 shard 并不合理。而当 $M» worker 的数量$ 时，我们可以动态分配，哪些 worker 完成任务了就来取数据执行，这样做更加 balance 。&lt;/p&gt;
+
+&lt;h3 id=&quot;step-2-fork-processes&quot;&gt;Step 2 ：fork processes&lt;/h3&gt;
+
+&lt;p&gt;生成很多 wokers 和 master&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/13_fork.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;step-3-map-task&quot;&gt;Step 3 ：map task&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;从输入中读取 shard&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;根据输入数据生成 &lt;strong&gt;key-value&lt;/strong&gt; pair；最终结果存在 memory 中&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/14_map.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;step-4-create-intermediate-files&quot;&gt;Step 4 ：create intermediate files&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;把生成的 intermediate files 定期的写入到 disk 中&lt;/li&gt;
+  &lt;li&gt;当完成后需要通知 master&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/15_intermediate.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;step-4a-partitioning&quot;&gt;Step 4a ：partitioning&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;根据 key 进行排序&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;Partition&lt;/strong&gt; function : 根据 key 值来决定分配给哪个 reduce worker&lt;/p&gt;
+
+    &lt;ul&gt;
+      &lt;li&gt;默认函数为：$\text{hash(key) mod M}$&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;&lt;strong&gt;每个&lt;/strong&gt; reduce worker 会从 &lt;strong&gt;所有&lt;/strong&gt; map worker 中读取属于它的 partition。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;step-5-sorting-intermediate-data&quot;&gt;Step 5 ：sorting intermediate data&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;可以通过 master 知道数据位置&lt;/li&gt;
+  &lt;li&gt;通过 RPC 从 map workers 的 &lt;strong&gt;local disk&lt;/strong&gt; 读取数据&lt;/li&gt;
+  &lt;li&gt;根据 key 值排序&lt;/li&gt;
+  &lt;li&gt;所有相同的 key 会 group 到一起&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/16_reduce.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;$\color{red}{相同的key一定去同一个reducer}$&lt;/p&gt;
+
+&lt;h3 id=&quot;step-6-reduce-task&quot;&gt;Step 6 ：reduce task&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;根据 key 和与之对应的一系列 values 整合结果&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/17_combiner.png&quot; width=&quot;300&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;最终结果 append 到输出文件&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Distributed System/MapReduce/18_output.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;step-7-return-to-user&quot;&gt;Step 7 ：return to user&lt;/h3&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;五mapreduce-设计细节&quot;&gt;（五）、MapReduce 设计细节&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;31-locality&quot;&gt;3.1 Locality&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;输入文件（input）和输出文件（output）保存在 GFS 中。&lt;/li&gt;
+  &lt;li&gt;MapReduce 运行在 GFS 的 chunkservers 上面；
+    &lt;ul&gt;
+      &lt;li&gt;主要是为了让计算和存储在相同的机器上&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Master 调度的时候尽量让含有相应数据的 worker 处理对应的数据&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;32-fault-tolerance&quot;&gt;3.2 Fault Tolerance&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Master 周期性的去 $ping$ 每个 worker （检查 worker fail）
+    &lt;ul&gt;
+      &lt;li&gt;如果一定时间内 worker 没有回复，则标记该 worker failed&lt;/li&gt;
+      &lt;li&gt;把分配给该 worker 的任务重新分配给别的 worker （&lt;strong&gt;re-execution&lt;/strong&gt;）&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;Master failure （Master fail 的情况）
+    &lt;ul&gt;
+      &lt;li&gt;状态 checkpointed to GFS&lt;/li&gt;
+      &lt;li&gt;由 GFS 来恢复 Master 并继续执行&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;33-straggler&quot;&gt;3.3 Straggler&lt;/h3&gt;
+
+&lt;p&gt;问题：有的 worker 执行速度快，有的 worker 执行速度慢（straggler）；而这些速度慢的 worker 会使得整个计算时间变慢。&lt;/p&gt;
+
+&lt;p&gt;解决方案：把任务分配给别的 worker，谁先做完就使用谁的结果。&lt;/p&gt;
+
+&lt;h3 id=&quot;34-intermediate-key-value-pairs&quot;&gt;3.4 Intermediate key-value pairs&lt;/h3&gt;
+
+&lt;p&gt;问题：中间结果表示 intermediate key-value 存储在哪里？存在 &lt;strong&gt;mapper&lt;/strong&gt; 的本地磁盘还是 &lt;strong&gt;reducer&lt;/strong&gt; 的本地磁盘。&lt;/p&gt;
+
+&lt;p&gt;第一种方案：
+&lt;strong&gt;Mapper-side&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;发送数据前做 partition；可以减少网络传输&lt;/li&gt;
+  &lt;li&gt;如果 Map task failure ; 会造成部分数据丢失&lt;/li&gt;
+  &lt;li&gt;如果 Reduce task failure; 只需要重新发送数据&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;第二种方案：
+&lt;strong&gt;Reducer-side&lt;/strong&gt;：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Pipeline -&amp;gt; overlap the transfer time&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;也就是说发送数据和执行可以 overlap （有的做完一部分 Map 后就可以发送数据，并不需要等待所有 Map worker 都做完后发送）&lt;/p&gt;
+
+&lt;p&gt;目前普遍用的是第一种方案。&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">本文简单介绍分布式计算框架 MapReduce</summary></entry><entry><title type="html">Graph Processing</title><link href="http://localhost:4000/tech/graph/distributed_system/2019/04/11/graph-processing.html" rel="alternate" type="text/html" title="Graph Processing" /><published>2019-04-11T16:42:14+08:00</published><updated>2019-04-11T16:42:14+08:00</updated><id>http://localhost:4000/tech/graph/distributed_system/2019/04/11/graph-processing</id><content type="html" xml:base="http://localhost:4000/tech/graph/distributed_system/2019/04/11/graph-processing.html">&lt;p&gt;本文主要简单介绍一些主流的图处理算法&lt;/p&gt;
 
 &lt;!--more--&gt;
 

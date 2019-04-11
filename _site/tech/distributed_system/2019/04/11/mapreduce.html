@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>MapReduce | CDZ</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="MapReduce" />
+<meta name="author" content="cdz" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="本文简单介绍分布式计算框架 MapReduce" />
+<meta property="og:description" content="本文简单介绍分布式计算框架 MapReduce" />
+<link rel="canonical" href="http://localhost:4000/tech/distributed_system/2019/04/11/mapreduce.html" />
+<meta property="og:url" content="http://localhost:4000/tech/distributed_system/2019/04/11/mapreduce.html" />
+<meta property="og:site_name" content="CDZ" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-04-11T20:44:48+08:00" />
+<script type="application/ld+json">
+{"description":"本文简单介绍分布式计算框架 MapReduce","author":{"@type":"Person","name":"cdz"},"@type":"BlogPosting","url":"http://localhost:4000/tech/distributed_system/2019/04/11/mapreduce.html","headline":"MapReduce","dateModified":"2019-04-11T20:44:48+08:00","datePublished":"2019-04-11T20:44:48+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"http://localhost:4000/tech/distributed_system/2019/04/11/mapreduce.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/feed.xml" title="CDZ" /><!-- [cdz]: 为了 markdown 数学公式 -->
+  <!-- 参考：
+  https://weilai5432.github.io/2017/01/11/MathJax-%E5%9C%A8MarkDown%E4%B8%AD%E6%8F%92%E5%85%A5%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/ -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX", "output/HTML-CSS"],
+      tex2jax: {
+        <!--$表示行内元素，$$表示块状元素 -->
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+      },
+      "HTML-CSS": { availableFonts: ["TeX"] }
+    });
+  </script>
+  <!--加载MathJax的最新文件， async表示异步加载进来 -->
+  <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js">
+  </script>
+
+<!-- <script color="0,0,0" opacity="0.5" count="99" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script> -->
+
+</head>
+<body>
+
+    <!-- <script color="0,0,0" opacity="0.5" count="99" src="/my_script/particles.min.js" type="text/javascript" charset="utf-8"></script> -->
+    <!-- [cdz]: 动画 -->
+    <!-- <div id="particles-js"></div>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+      /* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
+      particlesJS.load('particles-js', '/my_json/particles.json', function() {
+      console.log('callback - particles.js config loaded');
+      });
+    </script> -->
+    <!-- <script color="0,133,255" opacity="0.8" count="180" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript"></script> -->
+    <!-- <script color="0,133,255" opacity="0.8" count="180" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script> -->
+    <!-- <script src="https://www.supertechcrew.com/assets/js/main.min.js"></script> --><header class="site-header" role="banner">
+  
+
+
+  <div class="wrapper">
+    <!-- <script color="0,0,0" opacity="0.5" count="99" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script> -->
+    <!-- [cdz]: 添加以下一行用于给 pages 排序，排序规则按照 page 中的 order 属性排序 -->
+    <!-- [cdz]: 参考网址：https://stackoverflow.com/questions/13266369/how-to-change-the-default-order-pages-in-jekyll --><a class="site-title" rel="author" href="/">CDZ</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <!-- <div class="trigger"><a class="page-link" href="/">Home</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/categories/Distributed_System"></a><a class="page-link" href="/categories/Graph"></a><a class="page-link" href="/categories/LLVM"></a><a class="page-link" href="/categories/Jekyll"></a><a class="page-link" href="/categories/Life"></a><a class="page-link" href="/categories/Tech"></a><a class="page-link" href="/categories/Travel.html"></a></div> -->
+
+        <div class="trigger"><a class="page-link" href="/">Home</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/categories/Distributed_System"></a><a class="page-link" href="/categories/Graph"></a><a class="page-link" href="/categories/LLVM"></a><a class="page-link" href="/categories/Jekyll"></a><a class="page-link" href="/categories/Life"></a><a class="page-link" href="/categories/Tech"></a><a class="page-link" href="/categories/Travel.html"></a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="post-categories" align="right">
+  
+  
+  <a href="/categories/Tech">Tech</a>
+  &nbsp;
+  
+  <a href="/categories/Distributed_System">Distributed_System</a>
+  
+  
+</div>
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting"> 
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">MapReduce</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2019-04-11T20:44:48+08:00" itemprop="datePublished">Apr 11, 2019
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">cdz</span></span></p>
+  </header>
+
+
+
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>本文简单介绍分布式计算框架 MapReduce 
+<!--more--></p>
+
+<hr />
+
+<p><br /></p>
+<h2 id="一引入">（一）、引入</h2>
+<p><br /></p>
+
+<p><strong>MapReduce</strong> 的设计灵感来源于 Python 中的 $map$ 和 $reduce$ 函数。首先来看一下这两个函数是什么样的：</p>
+
+<p>$map$ : 接收一个函数 $f$ 和 一个数组 $list$ （或者可以 iterate 的一串数据） , 然后把该函数运用在该数组中的每个元素（element）</p>
+<p><img src="/image/Distributed System/MapReduce/1_map.png" width="500" /></p>
+<p><br /></p>
+
+<p>$reduce$：接收一个函数 $g$ 和 一个数组 $list$ ；然后对该 list 中的前两个元素运行函数 $g$ ，生成的结果当成 list 的一个元素，然后递归取前两个元素再次运行函数 $g$ 。</p>
+<p><img src="/image/Distributed System/MapReduce/2_reduce.png" width="500" /></p>
+<p><br /></p>
+
+<h4 id="实例">实例：</h4>
+
+<p>问题：给定一个数组，求该数组中每个元素都平方，然后相加的结果。</p>
+<p><img src="/image/Distributed System/MapReduce/3_map_reduce.png" width="700" /></p>
+<p><br /></p>
+
+<p>所以以上的执行过程可以看成：</p>
+<p><img src="/image/Distributed System/MapReduce/4_map_reduce.png" width="400" /></p>
+<p><br /></p>
+
+<p><strong>mapper</strong>：就是传给 $map$ 函数的处理函数；如以上例子的 $f$。
+<strong>reducer</strong>：就是传给 $reduce$ 函数的处理函数；如以上例子的 $g$。</p>
+
+<p>关键就在于程序员只需要去实现：$maper$ 和 $reducer$ 函数。</p>
+
+<hr />
+
+<p><br /></p>
+<h2 id="二mapreduce">（二）、MapReduce</h2>
+<p><br /></p>
+<p><img src="/image/Distributed System/MapReduce/5_relationship.png" width="300" /></p>
+<p><br /></p>
+
+<p>可以把 MapReduce 看成是 $map+reduce$ <code class="highlighter-rouge">by key</code></p>
+
+<ul>
+  <li>$mapper$ 函数并不是返回一个 value，而是返回一个 <strong>key-value</strong> 对（可能很多有相同的 key ）</li>
+  <li>在调用 $reducer$ 函数之前，需要把所有 key 值相同的结果存到一起。</li>
+</ul>
+
+<h4 id="21-过程">2.1 过程</h4>
+
+<p>对于普通的 map＋reduce 的过程如图所示：</p>
+
+<p>给定 item ，通过 mapper 函数得到新的 value，然后再通过 reducer 函数得到最终结果。</p>
+<p><img src="/image/Distributed System/MapReduce/6_map_reduce.png" width="500" /></p>
+<p><br /></p>
+
+<p>而对于 $MapReduce$ 的过程为：</p>
+
+<ul>
+  <li>
+    <p>给定输入 items ；通过 mapper 函数最终得到 <strong>key-value</strong> pair</p>
+  </li>
+  <li>
+    <p>execution engine 会把所有相同的 key 归类到一起。也就是 <strong>Shuffle过程</strong>（并不是程序员来完成）</p>
+  </li>
+  <li>
+    <p>最后 reducer 会根据 key 来完成整合，最后得到 <strong>key-value</strong> 对。（每一种 key 用一次 reducer 函数；当然，每个 reduce worker 可以处理多个 key）</p>
+  </li>
+</ul>
+
+<p><img src="/image/Distributed System/MapReduce/7_MapReduce.png" width="500" /></p>
+<p><br /></p>
+
+<hr />
+
+<p><br /></p>
+
+<h4 id="22-实例">2.2 实例</h4>
+
+<p><img src="/image/Distributed System/MapReduce/8_example1.png" width="500" /></p>
+<p><br /></p>
+
+<p><img src="/image/Distributed System/MapReduce/9_example2.png" width="700" /></p>
+<p><br /></p>
+
+<p><img src="/image/Distributed System/MapReduce/10_example3.png" width="700" /></p>
+<p><br /></p>
+
+<hr />
+
+<p><br /></p>
+<h2 id="三mapreduce-系统架构">（三）、MapReduce 系统架构</h2>
+<p><br /></p>
+
+<p><img src="/image/Distributed System/MapReduce/11_mapreduce_architecture.png" width="600" /></p>
+<p><br /></p>
+
+<ul>
+  <li>首先，我们有个用户进程来协调程序如何运行。如它会根据数据规模来判断需要把任务拆分给多少个 mapper 和 reducer 去完成。
+当它认为需要 5 个 mapper 去完成时，就会把数据拆成 5 份。</li>
+  <li>
+    <p>接着产生很多 woker （map woker 和 reduce woker）；而且还会产生一个 <strong>master worker</strong>，这个 $master$ 会作为用户的代理来协调整个过程，这样的话用户就可以去做别的事了。</p>
+  </li>
+  <li>$master$ 就会告诉 worker 去拿相应的数据（也就是分配数据的过程）。</li>
+  <li>map worker 就会本地完成 map 操作。</li>
+  <li>当 map 完成之后，$master$ 就会通知 reduce worker 去拿数据。</li>
+  <li>$reducer$ 完成 reduce 操作</li>
+  <li>最后把结果写到最终的文件中。</li>
+</ul>
+
+<p>所以总结为：</p>
+<ul>
+  <li><strong>split</strong> : 数据切分，分给不同的 map worker。（map worker 去拿数据）</li>
+  <li><strong>map</strong> : map worker 本地调用 mapper 函数</li>
+  <li><strong>Shuffle</strong> : 把数据分配给不同的 reduce worker （相同的 key 的数据给同一个 reduce worker）</li>
+  <li><strong>reduce</strong> ：reducer 完成 reduce 操作</li>
+  <li><strong>finalize</strong> ：数据整合</li>
+</ul>
+
+<hr />
+
+<p><br /></p>
+<h2 id="四mapreduce-完整过程">（四）、MapReduce 完整过程</h2>
+<p><br /></p>
+
+<h3 id="step1-split-input-files-into-chunks-shards">Step1 ：split input files into chunks (shards)</h3>
+
+<ul>
+  <li>切分数据成成很多 shard</li>
+</ul>
+<p><img src="/image/Distributed System/MapReduce/12_split.png" width="500" /></p>
+<p><br /></p>
+
+<p><code class="highlighter-rouge">注意</code>： $\color{blue}{shards 的数量 M» worker 的数量}$</p>
+
+<p>原因：对于每个 worker 输入大小一样时并不能保证执行 shard 的时间一样（各个机器的执行速度并不一样）；所以说每个 worker 分配一个 shard 并不合理。而当 $M» worker 的数量$ 时，我们可以动态分配，哪些 worker 完成任务了就来取数据执行，这样做更加 balance 。</p>
+
+<h3 id="step-2-fork-processes">Step 2 ：fork processes</h3>
+
+<p>生成很多 wokers 和 master</p>
+
+<p><img src="/image/Distributed System/MapReduce/13_fork.png" width="500" /></p>
+<p><br /></p>
+
+<h3 id="step-3-map-task">Step 3 ：map task</h3>
+
+<ul>
+  <li>
+    <p>从输入中读取 shard</p>
+  </li>
+  <li>
+    <p>根据输入数据生成 <strong>key-value</strong> pair；最终结果存在 memory 中</p>
+  </li>
+</ul>
+
+<p><img src="/image/Distributed System/MapReduce/14_map.png" width="500" /></p>
+<p><br /></p>
+
+<h3 id="step-4-create-intermediate-files">Step 4 ：create intermediate files</h3>
+
+<ul>
+  <li>把生成的 intermediate files 定期的写入到 disk 中</li>
+  <li>当完成后需要通知 master</li>
+</ul>
+
+<p><img src="/image/Distributed System/MapReduce/15_intermediate.png" width="500" /></p>
+<p><br /></p>
+
+<h3 id="step-4a-partitioning">Step 4a ：partitioning</h3>
+
+<ul>
+  <li>
+    <p>根据 key 进行排序</p>
+  </li>
+  <li>
+    <p><strong>Partition</strong> function : 根据 key 值来决定分配给哪个 reduce worker</p>
+
+    <ul>
+      <li>默认函数为：$\text{hash(key) mod M}$</li>
+    </ul>
+  </li>
+  <li>
+    <p><strong>每个</strong> reduce worker 会从 <strong>所有</strong> map worker 中读取属于它的 partition。</p>
+  </li>
+</ul>
+
+<h3 id="step-5-sorting-intermediate-data">Step 5 ：sorting intermediate data</h3>
+
+<ul>
+  <li>可以通过 master 知道数据位置</li>
+  <li>通过 RPC 从 map workers 的 <strong>local disk</strong> 读取数据</li>
+  <li>根据 key 值排序</li>
+  <li>所有相同的 key 会 group 到一起</li>
+</ul>
+
+<p><img src="/image/Distributed System/MapReduce/16_reduce.png" width="500" /></p>
+<p><br /></p>
+
+<p>$\color{red}{相同的key一定去同一个reducer}$</p>
+
+<h3 id="step-6-reduce-task">Step 6 ：reduce task</h3>
+
+<ul>
+  <li>根据 key 和与之对应的一系列 values 整合结果</li>
+</ul>
+<p><img src="/image/Distributed System/MapReduce/17_combiner.png" width="300" /></p>
+<p><br /></p>
+
+<ul>
+  <li>最终结果 append 到输出文件</li>
+</ul>
+<p><img src="/image/Distributed System/MapReduce/18_output.png" width="500" /></p>
+<p><br /></p>
+
+<h3 id="step-7-return-to-user">Step 7 ：return to user</h3>
+
+<hr />
+
+<p><br /></p>
+<h2 id="五mapreduce-设计细节">（五）、MapReduce 设计细节</h2>
+<p><br /></p>
+
+<h3 id="31-locality">3.1 Locality</h3>
+
+<ul>
+  <li>输入文件（input）和输出文件（output）保存在 GFS 中。</li>
+  <li>MapReduce 运行在 GFS 的 chunkservers 上面；
+    <ul>
+      <li>主要是为了让计算和存储在相同的机器上</li>
+    </ul>
+  </li>
+  <li>Master 调度的时候尽量让含有相应数据的 worker 处理对应的数据</li>
+</ul>
+
+<h3 id="32-fault-tolerance">3.2 Fault Tolerance</h3>
+
+<ul>
+  <li>Master 周期性的去 $ping$ 每个 worker （检查 worker fail）
+    <ul>
+      <li>如果一定时间内 worker 没有回复，则标记该 worker failed</li>
+      <li>把分配给该 worker 的任务重新分配给别的 worker （<strong>re-execution</strong>）</li>
+    </ul>
+  </li>
+  <li>Master failure （Master fail 的情况）
+    <ul>
+      <li>状态 checkpointed to GFS</li>
+      <li>由 GFS 来恢复 Master 并继续执行</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="33-straggler">3.3 Straggler</h3>
+
+<p>问题：有的 worker 执行速度快，有的 worker 执行速度慢（straggler）；而这些速度慢的 worker 会使得整个计算时间变慢。</p>
+
+<p>解决方案：把任务分配给别的 worker，谁先做完就使用谁的结果。</p>
+
+<h3 id="34-intermediate-key-value-pairs">3.4 Intermediate key-value pairs</h3>
+
+<p>问题：中间结果表示 intermediate key-value 存储在哪里？存在 <strong>mapper</strong> 的本地磁盘还是 <strong>reducer</strong> 的本地磁盘。</p>
+
+<p>第一种方案：
+<strong>Mapper-side</strong>：</p>
+<ul>
+  <li>发送数据前做 partition；可以减少网络传输</li>
+  <li>如果 Map task failure ; 会造成部分数据丢失</li>
+  <li>如果 Reduce task failure; 只需要重新发送数据</li>
+</ul>
+
+<p>第二种方案：
+<strong>Reducer-side</strong>：</p>
+<ul>
+  <li>Pipeline -&gt; overlap the transfer time</li>
+</ul>
+
+<p>也就是说发送数据和执行可以 overlap （有的做完一部分 Map 后就可以发送数据，并不需要等待所有 Map worker 都做完后发送）</p>
+
+<p>目前普遍用的是第一种方案。</p>
+
+  </div><a class="u-url" href="/tech/distributed_system/2019/04/11/mapreduce.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <!-- <h2 class="footer-heading">CDZ</h2> -->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">CDZ</li><li><a class="u-email" href="mailto:chendianzhang@sjtu.edu.cn">chendianzhang@sjtu.edu.cn</a></li></ul>
+      </div>
+      <!--以下会在 blog 最后显示一些_config.yml 中定义的一些网站的链接, 比如 GitHub 的链接-->
+      <!-- <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/Hicodechar"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">Hicodechar</span></a></li></ul>
+</div> -->
+      <div class="footer-col footer-col-3">
+        <p>Welcome to cdz&#39;s blog. Any questions or suggesions, please contact me.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>
