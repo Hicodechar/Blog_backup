@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.5.0 -->
+<title>Graph Processing | CDZ</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="Graph Processing" />
+<meta name="author" content="cdz" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="本文主要简单介绍一些主流的图处理算法" />
+<meta property="og:description" content="本文主要简单介绍一些主流的图处理算法" />
+<link rel="canonical" href="blog.dianzhangchen.com/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing.html" />
+<meta property="og:url" content="blog.dianzhangchen.com/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing.html" />
+<meta property="og:site_name" content="CDZ" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2019-04-11T16:42:14+08:00" />
+<script type="application/ld+json">
+{"description":"本文主要简单介绍一些主流的图处理算法","author":{"@type":"Person","name":"cdz"},"@type":"BlogPosting","url":"blog.dianzhangchen.com/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing.html","headline":"Graph Processing","dateModified":"2019-04-11T16:42:14+08:00","datePublished":"2019-04-11T16:42:14+08:00","mainEntityOfPage":{"@type":"WebPage","@id":"blog.dianzhangchen.com/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing.html"},"@context":"http://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/assets/main.css"><link type="application/atom+xml" rel="alternate" href="blog.dianzhangchen.com/feed.xml" title="CDZ" /><!-- [cdz]: 为了 markdown 数学公式 -->
+  <!-- 参考：
+  https://weilai5432.github.io/2017/01/11/MathJax-%E5%9C%A8MarkDown%E4%B8%AD%E6%8F%92%E5%85%A5%E6%95%B0%E5%AD%A6%E5%85%AC%E5%BC%8F/ -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      extensions: ["tex2jax.js"],
+      jax: ["input/TeX", "output/HTML-CSS"],
+      tex2jax: {
+        <!--$表示行内元素，$$表示块状元素 -->
+        inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ],
+        processEscapes: true
+      },
+      "HTML-CSS": { availableFonts: ["TeX"] }
+    });
+  </script>
+  <!--加载MathJax的最新文件， async表示异步加载进来 -->
+  <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js">
+  </script>
+
+<!-- <script color="0,0,0" opacity="0.5" count="99" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script> -->
+
+</head>
+<body>
+
+    <!-- <script color="0,0,0" opacity="0.5" count="99" src="/my_script/particles.min.js" type="text/javascript" charset="utf-8"></script> -->
+    <!-- [cdz]: 动画 -->
+    <!-- <div id="particles-js"></div>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <script>
+      /* particlesJS.load(@dom-id, @path-json, @callback (optional)); */
+      particlesJS.load('particles-js', '/my_json/particles.json', function() {
+      console.log('callback - particles.js config loaded');
+      });
+    </script> -->
+    <!-- <script color="0,133,255" opacity="0.8" count="180" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript"></script> -->
+    <!-- <script color="0,133,255" opacity="0.8" count="180" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script> -->
+    <!-- <script src="https://www.supertechcrew.com/assets/js/main.min.js"></script> --><header class="site-header" role="banner">
+  
+
+
+  <div class="wrapper">
+    <!-- <script color="0,0,0" opacity="0.5" count="99" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script> -->
+    <!-- [cdz]: 添加以下一行用于给 pages 排序，排序规则按照 page 中的 order 属性排序 -->
+    <!-- [cdz]: 参考网址：https://stackoverflow.com/questions/13266369/how-to-change-the-default-order-pages-in-jekyll --><a class="site-title" rel="author" href="/">CDZ</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <!-- <div class="trigger"><a class="page-link" href="/">Home</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/categories/Tech"></a><a class="page-link" href="/categories/Life"></a><a class="page-link" href="/categories/Travel.html"></a><a class="page-link" href="/categories/Jekyll"></a><a class="page-link" href="/categories/LLVM"></a></div> -->
+
+        <div class="trigger"><a class="page-link" href="/">Home</a><a class="page-link" href="/archive/">Archive</a><a class="page-link" href="/categories/">Categories</a><a class="page-link" href="/about/">About</a><a class="page-link" href="/categories/Tech"></a><a class="page-link" href="/categories/Life"></a><a class="page-link" href="/categories/Travel.html"></a><a class="page-link" href="/categories/Jekyll"></a><a class="page-link" href="/categories/LLVM"></a></div>
+      </nav></div>
+</header>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <div class="post-categories" align="right">
+  
+  
+  <a href="/categories/[Tech">[Tech</a>
+  &nbsp;
+  
+  <a href="/categories/Graph">Graph</a>
+  &nbsp;
+  
+  <a href="/categories/Distributed_System]">Distributed_System]</a>
+  
+  
+</div>
+
+<article class="post h-entry" itemscope itemtype="http://schema.org/BlogPosting"> 
+  <header class="post-header">
+    <h1 class="post-title p-name" itemprop="name headline">Graph Processing</h1>
+    <p class="post-meta">
+      <time class="dt-published" datetime="2019-04-11T16:42:14+08:00" itemprop="datePublished">Apr 11, 2019
+      </time>• <span itemprop="author" itemscope itemtype="http://schema.org/Person"><span class="p-author h-card" itemprop="name">cdz</span></span></p>
+  </header>
+
+
+
+
+  <div class="post-content e-content" itemprop="articleBody">
+    <p>本文主要简单介绍一些主流的图处理算法</p>
+
+<!--more-->
+
+<h2 id="一基础知识">（一）、基础知识</h2>
+<p><br /></p>
+
+<h3 id="1图的切分方式">1、图的切分方式</h3>
+<p>图的切分方式可以分为两种：</p>
+<ul>
+  <li>Edge-cut 边分割</li>
+  <li>Vertex-cut 顶点分割</li>
+</ul>
+
+<p><img src="/image/Graph Processing/1_edge_cut_vertex_cut.png" width="400" /></p>
+<p><br /></p>
+
+<h4 id="11edge-cut">1.1、Edge-cut</h4>
+
+<p><img src="/image/Graph Processing/2_1edge_cut.png" width="400" /></p>
+<p><br /></p>
+
+<p>边分割的话，会把各个点分到不同的机器上，当遇到两个机器上的点有边时，则把边切开，并在两个机器上生成<code class="highlighter-rouge">ghost</code>虚拟顶点；如下图所示：</p>
+<p><img src="/image/Graph Processing/2_2edge_cut.png" width="500" /></p>
+<p><br /></p>
+
+<p>该方法的缺点是：</p>
+<ul>
+  <li>被分割的边，在各个机器上都有一份边，造成边的数量剧增。当边的数量本来就多的话，造成的overhead更大。</li>
+  <li>当 master 节点发生更改时，需要同步给其 ghost 节点，造成网络开销。</li>
+</ul>
+
+<p>目前两种流行的图处理框架：<code class="highlighter-rouge">GraphLab</code> 和 <code class="highlighter-rouge">Pregel</code> 用的都是<code class="highlighter-rouge">Edge-cut</code>。保证节点均匀的分布在整个集群中间，边被切分成双份分散在整个集群中间。</p>
+
+<h4 id="12vertex-cut">1.2、Vertex-cut</h4>
+
+<p>引入 Vertex-cut 的目的：</p>
+<ul>
+  <li>减少通信开销</li>
+  <li>权衡图计算和图存储开销</li>
+</ul>
+
+<p>对于边的数量很多的节点，如果使用 Edge-cut 的话，会使得相应的被切割的边数量变多；且该点对应的 ghost 顶点也很多，所以当需要通信的话，造成的通信开销也变大。</p>
+
+<p>所以提出了<code class="highlighter-rouge">Vertex-cut</code>：</p>
+<p><img src="/image/Graph Processing/3_vertex_cut.png" width="400" /></p>
+<p><br /></p>
+
+<p>把 High-degree 的顶点进行<code class="highlighter-rouge">顶点分割</code>。</p>
+
+<p>这样做的好处是：</p>
+<ul>
+  <li>图中的<code class="highlighter-rouge">边的总数量不变</code></li>
+  <li>边被均匀的分布到不同的机器上</li>
+</ul>
+
+<p>目前两种流行的图处理框架：<code class="highlighter-rouge">PowerGraph</code> 和 <code class="highlighter-rouge">GraphX</code> 用的都是<code class="highlighter-rouge">Vertex-cut</code>。</p>
+
+<h3 id="2同步计算和异步计算">2、同步计算和异步计算</h3>
+
+<h4 id="21-同步计算">2.1 同步计算</h4>
+<p><br /></p>
+
+<p><img src="/image/Graph Processing/4_synchronous.png" width="400" /></p>
+<p><br /></p>
+
+<p>当所有顶点都计算完之后，才能开始下一轮迭代计算。</p>
+
+<p><strong>缺点</strong>：存在 <code class="highlighter-rouge">Stragglers(木桶的短板效应)</code>；当某个顶点计算很慢时，所有别的顶点需要去等待它。
+目前： <code class="highlighter-rouge">Pregel</code> 用的就是<code class="highlighter-rouge">同步计算</code>的方式。</p>
+
+<p><br /></p>
+<h4 id="22-异步计算">2.2 异步计算</h4>
+<p><br /></p>
+
+<p><img src="/image/Graph Processing/5_asynchronous.png" width="300" /></p>
+<p><br /></p>
+
+<p>异步计算允许一些不造成冲突的顶点同时去更新。不是等所有顶点都完成了一次迭代之后才开始下一轮迭代；而是，只要不冲突的顶点就可以继续执行下去。
+<strong>缺点：</strong>为了避免冲突，需要使用<code class="highlighter-rouge">锁</code>；而大量的锁会引起性能下降。</p>
+
+<hr />
+
+<p><br /></p>
+<h2 id="一pregel">（一）、Pregel</h2>
+<p><br /></p>
+
+<p>该算法是 Google 2010 年提出的图计算的算法。</p>
+
+<p>对图进行<code class="highlighter-rouge">edge-cut</code>；是一种<code class="highlighter-rouge">同步</code>计算的方法。</p>
+
+<p>该算法以<code class="highlighter-rouge">Bulk Synchronous Parallel(BSP) 整体同步并行计算模型</code> 为计算模型；
+在分布式下面，使用<code class="highlighter-rouge">message-passing(消息传递)</code>在各个顶点之间传递消息；并且是<code class="highlighter-rouge">shared-nothing</code>，也就是说对某个顶点的计算，其所需要的资源都在该顶点所在的机器上面。</p>
+
+<p>编程思想是：<code class="highlighter-rouge">Think like a vertex</code>：每一个顶点去跑一个算法，然后并行的去在不同的顶点上运行算法。</p>
+
+<p>计算步骤：</p>
+<ul>
+  <li>收取邻接顶点发来的 messages</li>
+  <li>执行该点上的算法</li>
+  <li>更新该点的值</li>
+  <li>发出 message 给邻接点，激活邻接点重新计算</li>
+</ul>
+
+<p><img src="/image/Graph Processing/5_pregel.png" width="400" /></p>
+<p><br /></p>
+
+<p>思路：<strong>把计算和通信分离</strong>；当所有顶点计算完之后，再统一进行消息传递；消息传递完之后，再统一下一次迭代的重新计算。直到收敛或者迭代到一定数量，也就是<code class="highlighter-rouge">同步计算</code>。</p>
+
+<hr />
+<p><br /></p>
+<h2 id="二graphlab">（二）、GraphLab</h2>
+<p><br /></p>
+
+<p>思路：<strong>认为 Pregel 这种同步计算的方式太慢</strong>，特别是对于稀疏图的计算，每次迭代中计算的点的数量很少，且存在<code class="highlighter-rouge">木桶短板效应</code>。</p>
+
+<p>所以<strong>主要思想</strong>是：提出<code class="highlighter-rouge">异步计算</code>的方法。</p>
+
+<p>首先，也需要把图进行划分，划分到不同的机器上；使用的划分方式是：<code class="highlighter-rouge">Edge-cut</code>。</p>
+
+<p>当要更新某个顶点时，<code class="highlighter-rouge">主动(pull)</code>的向邻接顶点获取信息。注意这里和 Pregel 的区别，Pregel 使用的<code class="highlighter-rouge">被动(push)</code>的从邻接顶点收取消息。</p>
+
+<p>那么主动和被动有什么本质的区别吗？</p>
+
+<p>有，当主动 pull 的话，此时的邻接顶点可以是在  Inactive(空闲) 状态，也就是可以睡觉；而 push 模式的话，邻接顶点必须是 active 状态给你发送消息。</p>
+
+<p>计算步骤：</p>
+<ul>
+  <li>从邻接顶点获取信息</li>
+  <li>更细顶点数据</li>
+  <li>如果需要，去叫醒邻接顶点开始计算</li>
+</ul>
+
+<p>在这个算法中，并不是所有顶点同时收敛；而是动态的有些顶点先收敛，之后其他顶点开始慢慢收敛。</p>
+
+<p>那么，如何异步调度哪些顶点开始计算呢？</p>
+<ul>
+  <li>Round Robin</li>
+  <li>FIFO</li>
+  <li>Priority</li>
+</ul>
+
+<p><code class="highlighter-rouge">异步计算的缺点</code>：当相邻两个顶点同时计算的话，会发生冲突，你拿邻接点开始计算，邻接点也拿你的数据开始计算，所以会造成 consistency 问题。</p>
+
+<p><img src="/image/Graph Processing/6_graphlab.png" width="300" /></p>
+<p><br /></p>
+
+<p>简而言之：<strong>用锁</strong></p>
+
+<hr />
+
+<p><br /></p>
+<h2 id="三powergraph">（三）、PowerGraph</h2>
+<p><br /></p>
+
+<p><strong>主要想法</strong>：对于 Pregel 和 GraphLab 都是基于Local(本地计算)，也就是当计算某个顶点的时候，其所需要的所有信息都在该本地机器上。但是，由于为了达到本地计算，会在每条分割边上产生一个 ghost 顶点；且<strong>这些 ghost 顶点之间需要同步</strong>。当某个顶点的边的数量很多时，产生的ghost也变多（每分割一条边就会产生一个ghost）；所以当这个顶点更新时，需要通知所有的ghost，该操作会带来很大性能开销。</p>
+
+<p>造成以上问题的主要原因：使用<code class="highlighter-rouge">edge-cut</code>。</p>
+
+<p><code class="highlighter-rouge">PowerGraph 思路</code>：采用 <code class="highlighter-rouge">vertex-cut</code>：</p>
+<p><img src="/image/Graph Processing/6_powergraph.png" width="600" /></p>
+<p><br /></p>
+
+<p>然后，计算的时候：</p>
+<ul>
+  <li>每个机器<code class="highlighter-rouge">并行</code>地计算自己的本地sum</li>
+  <li>最后整合到 master 主机上</li>
+  <li>master 主机更新数值之后，同步给告诉 mirror 节点</li>
+</ul>
+<p><img src="/image/Graph Processing/6_3powergraph.png" width="700" /></p>
+<p><br />
+由于 PowerGraph 只要同步一个点的节点信息，所以可以<code class="highlighter-rouge">减少通信信息</code>。同时对于边的数量非常大的顶点，可以把对于<code class="highlighter-rouge">该顶点</code>的计算<code class="highlighter-rouge">并行</code>到很多机器上运行。从而可以提高并行度。</p>
+
+<hr />
+
+<p><br /></p>
+<h2 id="四powerlyra">（四）、PowerLyra</h2>
+<p><br /></p>
+
+<p><strong>主要想法</strong>：由于之前的工作都是使用：<strong>one size fits all</strong> 的想法；要不都是使用 vertex-cut 要不都使用 edge-cut。
+这样做会带来问题：</p>
+<ul>
+  <li>当边的数量很多，但是使用 edge-cut 的话：
+    <ul>
+      <li>很大的竞争</li>
+      <li>很大的通信开销</li>
+    </ul>
+  </li>
+</ul>
+<p><img src="/image/Graph Processing/7_1powerlyra.png" width="500" /></p>
+<p><br /></p>
+
+<ul>
+  <li>当边的数量很少，但是使用 vertex-cut 的话：
+    <ul>
+      <li>没必要的同步操作；因为把一个顶点的计算，分布到多个机器上计算，然后整合。</li>
+    </ul>
+  </li>
+</ul>
+<p><img src="/image/Graph Processing/7_2powerlyra.png" width="500" /></p>
+<p><br /></p>
+
+<p><code class="highlighter-rouge">主要思路</code>：对于不同的顶点，动态采用不同的图分割方式和计算方式。</p>
+<ul>
+  <li>对于边数很多的顶点，采用类似 vertex-cut 的切分方式</li>
+  <li>对于边数很少的顶点，采用类似 edge-cut 的切分方式</li>
+</ul>
+
+<hr />
+
+<p><br /></p>
+<h2 id="五graphchi">（五）、GraphChi</h2>
+<p><br /></p>
+
+<p>单机下的图计算。</p>
+
+<p>对于一个很大的图一般是在内存中存不下的；所以一般都是存储在 disk 上，但是存储在 disk 上的话，会带来一些问题。比如读取数据的时候是 <code class="highlighter-rouge">Random Access 的，所以读取数据很慢</code>。</p>
+
+<p><code class="highlighter-rouge">想法：</code> 如何更改图的数据结构，使得读取数据的时候能够达到好的性能，也就是<strong>相关的数据尽量在一起</strong>。</p>
+
+<p>做法：</p>
+<ul>
+  <li>把图分割成很多 sharded，使得每个 shared 能够一次性被加载到内存中</li>
+  <li>边的终节点相同的顶点分配到同一个 shared 中</li>
+  <li>对于每个shared中，按照初边序号进行排序</li>
+</ul>
+<p><img src="/image/Graph Processing/8_graphchi.png" width="600" /></p>
+<p><br /></p>
+
+<p>按照以上划分的话：当我需要读取与顶点1和顶点2有关的数据的话，只要把 shard 1 中的顶点全部读取，然后看其余的shard，找到src为1或2的信息；由于每个shard中按照 src 排序了，所以<code class="highlighter-rouge">每个 shard 中需要读取的数据都在一起</code>，减少 Random Access 的开销。</p>
+
+<p>对读取与顶点1和顶点2有关的数据的话，只要读取以上黄色的区域就可以了。</p>
+
+
+  </div><a class="u-url" href="/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing.html" hidden></a>
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/"></data>
+
+  <div class="wrapper">
+
+    <!-- <h2 class="footer-heading">CDZ</h2> -->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">CDZ</li><li><a class="u-email" href="mailto:chendianzhang@sjtu.edu.cn">chendianzhang@sjtu.edu.cn</a></li></ul>
+      </div>
+      <!--以下会在 blog 最后显示一些_config.yml 中定义的一些网站的链接, 比如 GitHub 的链接-->
+      <!-- <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/Hicodechar"><svg class="svg-icon"><use xlink:href="/assets/minima-social-icons.svg#github"></use></svg> <span class="username">Hicodechar</span></a></li></ul>
+</div> -->
+      <div class="footer-col footer-col-3">
+        <p>Welcome to cdz&#39;s blog. Any questions or suggesions, please contact me.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

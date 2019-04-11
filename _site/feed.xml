@@ -1,4 +1,235 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="blog.dianzhangchen.com/feed.xml" rel="self" type="application/atom+xml" /><link href="blog.dianzhangchen.com/" rel="alternate" type="text/html" /><updated>2019-02-17T18:08:07+08:00</updated><id>blog.dianzhangchen.com/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">MPX</title><link href="blog.dianzhangchen.com/tech/2019/02/17/mpx.html" rel="alternate" type="text/html" title="MPX" /><published>2019-02-17T01:33:43+08:00</published><updated>2019-02-17T01:33:43+08:00</updated><id>blog.dianzhangchen.com/tech/2019/02/17/mpx</id><content type="html" xml:base="blog.dianzhangchen.com/tech/2019/02/17/mpx.html">&lt;p&gt;本文主要简单介绍 MPX&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="3.8.5">Jekyll</generator><link href="blog.dianzhangchen.com/feed.xml" rel="self" type="application/atom+xml" /><link href="blog.dianzhangchen.com/" rel="alternate" type="text/html" /><updated>2019-04-11T18:24:59+08:00</updated><id>blog.dianzhangchen.com/feed.xml</id><title type="html">CDZ</title><subtitle>Welcome to cdz's blog. Any questions or suggesions, please contact me.</subtitle><entry><title type="html">Graph Processing</title><link href="blog.dianzhangchen.com/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing.html" rel="alternate" type="text/html" title="Graph Processing" /><published>2019-04-11T16:42:14+08:00</published><updated>2019-04-11T16:42:14+08:00</updated><id>blog.dianzhangchen.com/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing</id><content type="html" xml:base="blog.dianzhangchen.com/%5Btech/graph/distributed_system%5D/2019/04/11/graph-processing.html">&lt;p&gt;本文主要简单介绍一些主流的图处理算法&lt;/p&gt;
+
+&lt;!--more--&gt;
+
+&lt;h2 id=&quot;一基础知识&quot;&gt;（一）、基础知识&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;1图的切分方式&quot;&gt;1、图的切分方式&lt;/h3&gt;
+&lt;p&gt;图的切分方式可以分为两种：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Edge-cut 边分割&lt;/li&gt;
+  &lt;li&gt;Vertex-cut 顶点分割&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/1_edge_cut_vertex_cut.png&quot; width=&quot;400&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;11edge-cut&quot;&gt;1.1、Edge-cut&lt;/h4&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/2_1edge_cut.png&quot; width=&quot;400&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;边分割的话，会把各个点分到不同的机器上，当遇到两个机器上的点有边时，则把边切开，并在两个机器上生成&lt;code class=&quot;highlighter-rouge&quot;&gt;ghost&lt;/code&gt;虚拟顶点；如下图所示：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/2_2edge_cut.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;该方法的缺点是：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;被分割的边，在各个机器上都有一份边，造成边的数量剧增。当边的数量本来就多的话，造成的overhead更大。&lt;/li&gt;
+  &lt;li&gt;当 master 节点发生更改时，需要同步给其 ghost 节点，造成网络开销。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;目前两种流行的图处理框架：&lt;code class=&quot;highlighter-rouge&quot;&gt;GraphLab&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;Pregel&lt;/code&gt; 用的都是&lt;code class=&quot;highlighter-rouge&quot;&gt;Edge-cut&lt;/code&gt;。保证节点均匀的分布在整个集群中间，边被切分成双份分散在整个集群中间。&lt;/p&gt;
+
+&lt;h4 id=&quot;12vertex-cut&quot;&gt;1.2、Vertex-cut&lt;/h4&gt;
+
+&lt;p&gt;引入 Vertex-cut 的目的：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;减少通信开销&lt;/li&gt;
+  &lt;li&gt;权衡图计算和图存储开销&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;对于边的数量很多的节点，如果使用 Edge-cut 的话，会使得相应的被切割的边数量变多；且该点对应的 ghost 顶点也很多，所以当需要通信的话，造成的通信开销也变大。&lt;/p&gt;
+
+&lt;p&gt;所以提出了&lt;code class=&quot;highlighter-rouge&quot;&gt;Vertex-cut&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/3_vertex_cut.png&quot; width=&quot;400&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;把 High-degree 的顶点进行&lt;code class=&quot;highlighter-rouge&quot;&gt;顶点分割&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;这样做的好处是：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;图中的&lt;code class=&quot;highlighter-rouge&quot;&gt;边的总数量不变&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;边被均匀的分布到不同的机器上&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;目前两种流行的图处理框架：&lt;code class=&quot;highlighter-rouge&quot;&gt;PowerGraph&lt;/code&gt; 和 &lt;code class=&quot;highlighter-rouge&quot;&gt;GraphX&lt;/code&gt; 用的都是&lt;code class=&quot;highlighter-rouge&quot;&gt;Vertex-cut&lt;/code&gt;。&lt;/p&gt;
+
+&lt;h3 id=&quot;2同步计算和异步计算&quot;&gt;2、同步计算和异步计算&lt;/h3&gt;
+
+&lt;h4 id=&quot;21-同步计算&quot;&gt;2.1 同步计算&lt;/h4&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/4_synchronous.png&quot; width=&quot;400&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;当所有顶点都计算完之后，才能开始下一轮迭代计算。&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;缺点&lt;/strong&gt;：存在 &lt;code class=&quot;highlighter-rouge&quot;&gt;Stragglers(木桶的短板效应)&lt;/code&gt;；当某个顶点计算很慢时，所有别的顶点需要去等待它。
+目前： &lt;code class=&quot;highlighter-rouge&quot;&gt;Pregel&lt;/code&gt; 用的就是&lt;code class=&quot;highlighter-rouge&quot;&gt;同步计算&lt;/code&gt;的方式。&lt;/p&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h4 id=&quot;22-异步计算&quot;&gt;2.2 异步计算&lt;/h4&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/5_asynchronous.png&quot; width=&quot;300&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;异步计算允许一些不造成冲突的顶点同时去更新。不是等所有顶点都完成了一次迭代之后才开始下一轮迭代；而是，只要不冲突的顶点就可以继续执行下去。
+&lt;strong&gt;缺点：&lt;/strong&gt;为了避免冲突，需要使用&lt;code class=&quot;highlighter-rouge&quot;&gt;锁&lt;/code&gt;；而大量的锁会引起性能下降。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;一pregel&quot;&gt;（一）、Pregel&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;该算法是 Google 2010 年提出的图计算的算法。&lt;/p&gt;
+
+&lt;p&gt;对图进行&lt;code class=&quot;highlighter-rouge&quot;&gt;edge-cut&lt;/code&gt;；是一种&lt;code class=&quot;highlighter-rouge&quot;&gt;同步&lt;/code&gt;计算的方法。&lt;/p&gt;
+
+&lt;p&gt;该算法以&lt;code class=&quot;highlighter-rouge&quot;&gt;Bulk Synchronous Parallel(BSP) 整体同步并行计算模型&lt;/code&gt; 为计算模型；
+在分布式下面，使用&lt;code class=&quot;highlighter-rouge&quot;&gt;message-passing(消息传递)&lt;/code&gt;在各个顶点之间传递消息；并且是&lt;code class=&quot;highlighter-rouge&quot;&gt;shared-nothing&lt;/code&gt;，也就是说对某个顶点的计算，其所需要的资源都在该顶点所在的机器上面。&lt;/p&gt;
+
+&lt;p&gt;编程思想是：&lt;code class=&quot;highlighter-rouge&quot;&gt;Think like a vertex&lt;/code&gt;：每一个顶点去跑一个算法，然后并行的去在不同的顶点上运行算法。&lt;/p&gt;
+
+&lt;p&gt;计算步骤：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;收取邻接顶点发来的 messages&lt;/li&gt;
+  &lt;li&gt;执行该点上的算法&lt;/li&gt;
+  &lt;li&gt;更新该点的值&lt;/li&gt;
+  &lt;li&gt;发出 message 给邻接点，激活邻接点重新计算&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/5_pregel.png&quot; width=&quot;400&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;思路：&lt;strong&gt;把计算和通信分离&lt;/strong&gt;；当所有顶点计算完之后，再统一进行消息传递；消息传递完之后，再统一下一次迭代的重新计算。直到收敛或者迭代到一定数量，也就是&lt;code class=&quot;highlighter-rouge&quot;&gt;同步计算&lt;/code&gt;。&lt;/p&gt;
+
+&lt;hr /&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;二graphlab&quot;&gt;（二）、GraphLab&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;思路：&lt;strong&gt;认为 Pregel 这种同步计算的方式太慢&lt;/strong&gt;，特别是对于稀疏图的计算，每次迭代中计算的点的数量很少，且存在&lt;code class=&quot;highlighter-rouge&quot;&gt;木桶短板效应&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;所以&lt;strong&gt;主要思想&lt;/strong&gt;是：提出&lt;code class=&quot;highlighter-rouge&quot;&gt;异步计算&lt;/code&gt;的方法。&lt;/p&gt;
+
+&lt;p&gt;首先，也需要把图进行划分，划分到不同的机器上；使用的划分方式是：&lt;code class=&quot;highlighter-rouge&quot;&gt;Edge-cut&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;当要更新某个顶点时，&lt;code class=&quot;highlighter-rouge&quot;&gt;主动(pull)&lt;/code&gt;的向邻接顶点获取信息。注意这里和 Pregel 的区别，Pregel 使用的&lt;code class=&quot;highlighter-rouge&quot;&gt;被动(push)&lt;/code&gt;的从邻接顶点收取消息。&lt;/p&gt;
+
+&lt;p&gt;那么主动和被动有什么本质的区别吗？&lt;/p&gt;
+
+&lt;p&gt;有，当主动 pull 的话，此时的邻接顶点可以是在  Inactive(空闲) 状态，也就是可以睡觉；而 push 模式的话，邻接顶点必须是 active 状态给你发送消息。&lt;/p&gt;
+
+&lt;p&gt;计算步骤：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;从邻接顶点获取信息&lt;/li&gt;
+  &lt;li&gt;更细顶点数据&lt;/li&gt;
+  &lt;li&gt;如果需要，去叫醒邻接顶点开始计算&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;在这个算法中，并不是所有顶点同时收敛；而是动态的有些顶点先收敛，之后其他顶点开始慢慢收敛。&lt;/p&gt;
+
+&lt;p&gt;那么，如何异步调度哪些顶点开始计算呢？&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;Round Robin&lt;/li&gt;
+  &lt;li&gt;FIFO&lt;/li&gt;
+  &lt;li&gt;Priority&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;异步计算的缺点&lt;/code&gt;：当相邻两个顶点同时计算的话，会发生冲突，你拿邻接点开始计算，邻接点也拿你的数据开始计算，所以会造成 consistency 问题。&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/6_graphlab.png&quot; width=&quot;300&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;简而言之：&lt;strong&gt;用锁&lt;/strong&gt;&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;三powergraph&quot;&gt;（三）、PowerGraph&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;主要想法&lt;/strong&gt;：对于 Pregel 和 GraphLab 都是基于Local(本地计算)，也就是当计算某个顶点的时候，其所需要的所有信息都在该本地机器上。但是，由于为了达到本地计算，会在每条分割边上产生一个 ghost 顶点；且&lt;strong&gt;这些 ghost 顶点之间需要同步&lt;/strong&gt;。当某个顶点的边的数量很多时，产生的ghost也变多（每分割一条边就会产生一个ghost）；所以当这个顶点更新时，需要通知所有的ghost，该操作会带来很大性能开销。&lt;/p&gt;
+
+&lt;p&gt;造成以上问题的主要原因：使用&lt;code class=&quot;highlighter-rouge&quot;&gt;edge-cut&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;PowerGraph 思路&lt;/code&gt;：采用 &lt;code class=&quot;highlighter-rouge&quot;&gt;vertex-cut&lt;/code&gt;：&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/6_powergraph.png&quot; width=&quot;600&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;然后，计算的时候：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;每个机器&lt;code class=&quot;highlighter-rouge&quot;&gt;并行&lt;/code&gt;地计算自己的本地sum&lt;/li&gt;
+  &lt;li&gt;最后整合到 master 主机上&lt;/li&gt;
+  &lt;li&gt;master 主机更新数值之后，同步给告诉 mirror 节点&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/6_3powergraph.png&quot; width=&quot;700&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;
+由于 PowerGraph 只要同步一个点的节点信息，所以可以&lt;code class=&quot;highlighter-rouge&quot;&gt;减少通信信息&lt;/code&gt;。同时对于边的数量非常大的顶点，可以把对于&lt;code class=&quot;highlighter-rouge&quot;&gt;该顶点&lt;/code&gt;的计算&lt;code class=&quot;highlighter-rouge&quot;&gt;并行&lt;/code&gt;到很多机器上运行。从而可以提高并行度。&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;四powerlyra&quot;&gt;（四）、PowerLyra&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;主要想法&lt;/strong&gt;：由于之前的工作都是使用：&lt;strong&gt;one size fits all&lt;/strong&gt; 的想法；要不都是使用 vertex-cut 要不都使用 edge-cut。
+这样做会带来问题：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;当边的数量很多，但是使用 edge-cut 的话：
+    &lt;ul&gt;
+      &lt;li&gt;很大的竞争&lt;/li&gt;
+      &lt;li&gt;很大的通信开销&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/7_1powerlyra.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;当边的数量很少，但是使用 vertex-cut 的话：
+    &lt;ul&gt;
+      &lt;li&gt;没必要的同步操作；因为把一个顶点的计算，分布到多个机器上计算，然后整合。&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/7_2powerlyra.png&quot; width=&quot;500&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;主要思路&lt;/code&gt;：对于不同的顶点，动态采用不同的图分割方式和计算方式。&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;对于边数很多的顶点，采用类似 vertex-cut 的切分方式&lt;/li&gt;
+  &lt;li&gt;对于边数很少的顶点，采用类似 edge-cut 的切分方式&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;h2 id=&quot;五graphchi&quot;&gt;（五）、GraphChi&lt;/h2&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;单机下的图计算。&lt;/p&gt;
+
+&lt;p&gt;对于一个很大的图一般是在内存中存不下的；所以一般都是存储在 disk 上，但是存储在 disk 上的话，会带来一些问题。比如读取数据的时候是 &lt;code class=&quot;highlighter-rouge&quot;&gt;Random Access 的，所以读取数据很慢&lt;/code&gt;。&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;想法：&lt;/code&gt; 如何更改图的数据结构，使得读取数据的时候能够达到好的性能，也就是&lt;strong&gt;相关的数据尽量在一起&lt;/strong&gt;。&lt;/p&gt;
+
+&lt;p&gt;做法：&lt;/p&gt;
+&lt;ul&gt;
+  &lt;li&gt;把图分割成很多 sharded，使得每个 shared 能够一次性被加载到内存中&lt;/li&gt;
+  &lt;li&gt;边的终节点相同的顶点分配到同一个 shared 中&lt;/li&gt;
+  &lt;li&gt;对于每个shared中，按照初边序号进行排序&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;img src=&quot;/image/Graph Processing/8_graphchi.png&quot; width=&quot;600&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;br /&gt;&lt;/p&gt;
+
+&lt;p&gt;按照以上划分的话：当我需要读取与顶点1和顶点2有关的数据的话，只要把 shard 1 中的顶点全部读取，然后看其余的shard，找到src为1或2的信息；由于每个shard中按照 src 排序了，所以&lt;code class=&quot;highlighter-rouge&quot;&gt;每个 shard 中需要读取的数据都在一起&lt;/code&gt;，减少 Random Access 的开销。&lt;/p&gt;
+
+&lt;p&gt;对读取与顶点1和顶点2有关的数据的话，只要读取以上黄色的区域就可以了。&lt;/p&gt;</content><author><name>cdz</name></author><summary type="html">本文主要简单介绍一些主流的图处理算法</summary></entry><entry><title type="html">MPX</title><link href="blog.dianzhangchen.com/tech/2019/02/17/mpx.html" rel="alternate" type="text/html" title="MPX" /><published>2019-02-17T01:33:43+08:00</published><updated>2019-02-17T01:33:43+08:00</updated><id>blog.dianzhangchen.com/tech/2019/02/17/mpx</id><content type="html" xml:base="blog.dianzhangchen.com/tech/2019/02/17/mpx.html">&lt;p&gt;本文主要简单介绍 MPX&lt;/p&gt;
 
 &lt;!--more--&gt;
 
@@ -428,10 +659,7 @@ jekyll serve
 它拥有了一个步行街该有的繁华，绚丽。&lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;不得不说，东北的暖气是神一般的存在。&lt;br /&gt;
-当晚在宾馆，热得一宿没睡，就在思考一个问题，为啥暖气不设计为可以选择性开关？&lt;br /&gt;
-想来想去也没想到好的解决办法。&lt;br /&gt;
-如果给用户可以关闭暖气的开关的话，那么暖气就应该走另外的辅助通道，而对于暖气供应公司来说，并没有减少能耗，还不如不让关闭，还能都收取费用。&lt;br /&gt;
-那么能不能重新设计暖气通道，使得暖气不需要辅助通道的情况下设计为可以选择性关闭？而这又是一个图连通问题，我们不确定哪些用户会关闭暖气，有可能一些用户关闭暖气后，导致图不连通，使得某些开暖气的用户，也无法开启暖气。&lt;br /&gt;&lt;/p&gt;
+当晚在宾馆，热得飞起。&lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;第二天就去了沈阳冰雪大世界，各种游乐项目：冰上碰碰车，雪摩托，雪地飞狐。&lt;br /&gt;
 最刺激的还是冰滑道：&lt;/p&gt;
@@ -450,8 +678,7 @@ jekyll serve
 
 &lt;p&gt;在一个类似火车卧铺的床位上加上一层一次性桌布，往上一躺。&lt;br /&gt;
 搓澡师当面开封一个新的搓澡巾, 然后就卡卡搓上了。&lt;br /&gt;
-变搓边唠嗑，东北话自带幽默属性。&lt;br /&gt;
-闭眼，细听，完全认同了东北的搓澡文化。&lt;br /&gt;&lt;/p&gt;
+变搓边唠嗑，东北话自带幽默属性。&lt;br /&gt;&lt;/p&gt;
 
 &lt;p&gt;想体验东北文化，就得整全套的。&lt;br /&gt;
 搓澡之后的烧烤是必须的，东北澡堂周边必有烧烤店。&lt;br /&gt;
