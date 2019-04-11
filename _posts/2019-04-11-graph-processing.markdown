@@ -2,7 +2,7 @@
 layout: post
 title: "Graph Processing"
 date: 2019-04-11T16:42:14+08:00
-categories: "[Tech Graph Distributed_System]"
+categories: [Tech, Graph, Distributed_System ]
 author: cdz
 excerpt_separator: <!--more-->
 ---
