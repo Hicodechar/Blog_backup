@@ -1,7 +1,9 @@
 <header class="site-header" role="banner">
   
+
+
   <div class="wrapper">
-      <script color="0,0,0" opacity="0.5" count="99" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script>
+    <!-- <script color="0,0,0" opacity="0.5" count="99" src="https://cdn.bootcss.com/canvas-nest.js/1.0.1/canvas-nest.js" type="text/javascript" charset="utf-8"></script> -->
     <!-- [cdz]: 添加以下一行用于给 pages 排序，排序规则按照 page 中的 order 属性排序 -->
     <!-- [cdz]: 参考网址：https://stackoverflow.com/questions/13266369/how-to-change-the-default-order-pages-in-jekyll -->
     {%- assign order_pages = site.pages | sort: "order" -%} 
@@ -42,10 +44,7 @@
               {%- endif -%}
             {%- endfor -%}
           </div>
-
       </nav>
     {%- endif -%}
-
   </div>
-
 </header>
